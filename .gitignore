@@ -1,3 +1,9 @@
 .DS_Store
 *.ipynb_*
 *.pyc
+*.feather
+*.png
+*.pdf
+*.pth
+.Rhistory
+

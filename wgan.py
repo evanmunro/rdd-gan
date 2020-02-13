@@ -53,17 +53,21 @@ class DataWrapper(object):
         List of labels of each categorical variable
     cont_bounds: torch.tensor
         formatted lower and upper bounds of continuous variables
-    ATTRIBUTES    
+    ATTRIBUTES
     """
     def __init__(self, df, continuous_vars=[], categorical_vars=[], context_vars=[],
-                 continuous_lower_bounds = dict(), continuous_upper_bounds = dict()):
+                 continuous_lower_bounds = dict(), continuous_upper_bounds = dict(),scale=True):
         variables = dict(continuous=continuous_vars,
                          categorical=categorical_vars,
                          context=context_vars)
         self.variables = variables
         continuous, context = [torch.tensor(np.array(df[variables[_]])).to(torch.float) for _ in ("continuous", "context")]
-        self.means = [x.mean(0, keepdim=True) for x in (continuous, context)]
-        self.stds  = [x.std(0,  keepdim=True) + 1e-5 for x in (continuous, context)]
+        if scale:
+            self.means = [x.mean(0, keepdim=True) for x in (continuous, context)]
+            self.stds  = [x.std(0,  keepdim=True) + 1e-5 for x in (continuous, context)]
+        else:
+            self.means = [x.mean(0, keepdim=True) - x.mean(0, keepdim=True) for x in (continuous, context)]
+            self.stds  = [x.std(0,  keepdim=True)/x.std(0,keepdim=True) for x in (continuous, context)]
         self.cat_dims = [df[v].nunique() for v in variables["categorical"]]
         self.cat_labels = [torch.tensor(pd.get_dummies(df[v]).columns.to_numpy()).to(torch.float) for v in variables["categorical"]]
         self.cont_bounds = [[continuous_lower_bounds[v] if v in continuous_lower_bounds.keys() else -1e8 for v in variables["continuous"]],
@@ -230,7 +234,7 @@ class Specifications(object):
         Contains the neural network-related settings for training
     data: dict
         Contains settings related to the data dimension and bounds
-    ATTRIBUTES                                                
+    ATTRIBUTES
     """
     def __init__(self, data_wrapper,
                  critic_d_hidden = [128,128,128],
@@ -354,7 +358,7 @@ class Critic(nn.Module):
         Dense neural network making up the critic
     dropout: torch.nn.Dropout
         Dropout layer applied between each of hidden layers
-    ATTRIBUTES        
+    ATTRIBUTES
     """
     def __init__(self, specifications):
         super().__init__()
