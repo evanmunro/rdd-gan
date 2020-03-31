@@ -336,7 +336,7 @@ class Generator(nn.Module):
         -------
         torch.tensor
         """
-        noise = torch.randn(context.size(0), self.d_noise).to(context.device)
+        noise = torch.rand(context.size(0), self.d_noise).to(context.device)
         x = torch.cat([noise, context], -1)
         for layer in self.layers[:-1]:
             x = self.dropout(F.relu(layer(x)))
@@ -405,7 +405,7 @@ class Critic(nn.Module):
         -------
         torch.tensor
         """
-        alpha = torch.randn(x.size(0)).unsqueeze(1).to(x.device)
+        alpha = torch.rand(x.size(0)).unsqueeze(1).to(x.device)
         interpolated = x * alpha + x_hat * (1 - alpha)
         interpolated = torch.autograd.Variable(interpolated.detach(), requires_grad=True)
         critic = self(interpolated, context)
