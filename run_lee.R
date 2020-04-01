@@ -5,7 +5,7 @@ library(kableExtra)
 plan(multiprocess(workers=4))
 
 data = read.csv("data/cleaned/lee.csv")
-gen <- feather::read_feather("data/generated/lee_generated.feather")
+gen <- feather::read_feather("data/generated/lee_gen.feather")
 
 real.da <- data[data['x']>0,]
 real.db <- data[data['x']<=0,]
