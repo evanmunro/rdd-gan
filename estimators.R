@@ -11,7 +11,7 @@ rdd_IK <- function(Y,X, c=0) {
   return(list(ate=ate,se=se,ci.lower=ci[1],ci.upper=ci[2],bw=model$bw[1]))
 }
 
-rdd_IW <- function(Y,X,c=0,M=1.74) {
+rdd_IW <- function(Y,X,M,c=0) {
   W = as.numeric(X>c)
   model <-  optrdd::optrdd(X,Y,W,
               max.second.derivative=M,verbose=F,estimation.point=c,
@@ -22,7 +22,7 @@ rdd_IW <- function(Y,X,c=0,M=1.74) {
   return(list(ate=ate,se=se,ci.lower=ci[1],ci.upper=ci[2],bw=0))
 }
 
-rdd_AK <- function(Y,X,c=0,M=1.74) {
+rdd_AK <- function(Y,X,M,c=0) {
   model <- RDHonest::RDHonest(y~x,data=data.frame(y=Y,x=X),cutoff=c,M=M,kern="triangular",opt.criterion="MSE",sclass="T")
   ate <- model$estimate
   se <- as.numeric(model$sd)

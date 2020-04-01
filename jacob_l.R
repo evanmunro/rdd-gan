@@ -69,7 +69,7 @@ make_table <- function(samples,gt=-0.0892) {
 }
 
 result <- make_table(samples)
-kable(result,"latex",booktabs=T)
+print(kable(result,"latex",booktabs=T))
 
 
 model.gen <- rdd::RDestimate(y~x,gen)
