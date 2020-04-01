@@ -6,7 +6,7 @@ plan(multiprocess(workers=20))
 
 dgp <- function() { 
   n = nrow(data)*10
-  X = data$x[sample(1:n,n,replace=T)]
+  X = data$x[sample(1:nrow(data),n,replace=T)]
   y = sapply(X,FUN = function(x) {
     mu = 0.4905 + 0.5648*x+ 0.0562*x^2 -0.2450*x^3   
     sigma = 0.1375
