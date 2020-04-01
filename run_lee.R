@@ -1,3 +1,4 @@
+setwd("/scratch/users/munro/rdd-gan")
 source("estimators.R")
 library(future.apply)
 library(ggplot2)
