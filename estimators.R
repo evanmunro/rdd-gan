@@ -37,3 +37,23 @@ rdd_QD<- function(Y,X,c=0) {
   ci <- ate+c(-1,1)*1.96*se
   return(list(ate=ate,se=se,ci.lower=ci[1],ci.upper=ci[2],bw=model$bws['h','left']))
 }
+
+
+ate_sample <- function(dfa,dfb,na,nb) {
+  dfa <- dfa[sample(1:nrow(dfa),na),]
+  dfb <- dfb[sample(1:nrow(dfb),nb),]
+  df <- data.frame(rbind(dfa,dfb))
+  M= RDHonest::NPR_MROT.fit(RDHonest::RDData(df[,c("y","x")], cutoff=0))
+  return(c(rdd_IK(df$y,df$x)$ate,rdd_AK(df$y,df$x,M)$ate,rdd_IW(df$y,df$x,M)$ate,rdd_QD(df$y,df$x)$ate,M))
+}
+
+
+make_table <- function(samples) {
+  gt = rdd_IK(gen$y,gen$x)$ate
+  bias <- apply(samples[1:4,],MARGIN=1,FUN=function(x){mean(x-gt)})
+  sd <- apply(samples[1:4,],MARGIN=1,FUN=sd)
+  rmse <- apply(samples[1:4,],MARGIN=1,FUN=function(x){mean((x-gt)^2)})
+  table <- data.frame(estimate = rowMeans(samples[1:4,]),rmse=rmse,bias=bias,sd=sd)
+  rownames(table) <- c("rdd_IK","rdd_AK","rdd_IW","rdd_QD")
+  return(table)
+}
