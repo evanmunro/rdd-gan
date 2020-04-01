@@ -52,7 +52,7 @@ make_table <- function(samples) {
   gt = rdd_IK(gen$y,gen$x)$ate
   bias <- apply(samples[1:4,],MARGIN=1,FUN=function(x){mean(x-gt)})
   sd <- apply(samples[1:4,],MARGIN=1,FUN=sd)
-  rmse <- apply(samples[1:4,],MARGIN=1,FUN=function(x){mean((x-gt)^2)})
+  rmse <- apply(samples[1:4,],MARGIN=1,FUN=function(x){sqrt(mean((x-gt)^2))})
   table <- data.frame(estimate = rowMeans(samples[1:4,]),rmse=rmse,bias=bias,sd=sd)
   rownames(table) <- c("rdd_IK","rdd_AK","rdd_IW","rdd_QD")
   return(table)
