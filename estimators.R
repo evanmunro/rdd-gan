@@ -31,7 +31,9 @@ rdd_AK <- function(Y,X,M,c=0) {
 }
 
 rdd_QD<- function(Y,X,c=0) {
+  sink("/dev/null")
   model <- rdrobust::rdrobust(Y,X,c=c,p=2)
+  sink() 
   ate <- model$coef[3]
   se <- model$se[3]
   ci <- ate+c(-1,1)*1.96*se
@@ -39,21 +41,30 @@ rdd_QD<- function(Y,X,c=0) {
 }
 
 
-ate_sample <- function(dfa,dfb,na,nb) {
+ate_sample <- function(dfa,dfb,na,nb,gt) {
   dfa <- dfa[sample(1:nrow(dfa),na),]
   dfb <- dfb[sample(1:nrow(dfb),nb),]
   df <- data.frame(rbind(dfa,dfb))
   M= RDHonest::NPR_MROT.fit(RDHonest::RDData(df[,c("y","x")], cutoff=0))
-  return(c(rdd_IK(df$y,df$x)$ate,rdd_AK(df$y,df$x,M)$ate,rdd_IW(df$y,df$x,M)$ate,rdd_QD(df$y,df$x)$ate,M))
+  ik = rdd_IK(df$y,df$x)
+  ak = rdd_AK(df$y,df$x,M)
+  iw = rdd_IW(df$y,df$x,M)
+  qd = rdd_QD(df$y,df$x)
+  ik.cov = (gt <= ik$ci.upper & gt >= ik$ci.lower)
+  ak.cov = (gt <= ak$ci.upper & gt >= ak$ci.lower)
+  iw.cov = (gt <= iw$ci.upper & gt >= iw$ci.lower)
+  qd.cov = (gt <= qd$ci.upper & gt >= qd$ci.lower)
+  return(c(ik$ate, ak$ate, iw$ate, qd$ate, M,
+           ik.cov, ak.cov, iw.cov, qd.cov))
 }
 
 
-make_table <- function(samples) {
-  gt = rdd_IK(gen$y,gen$x)$ate
+make_table <- function(samples,gt) {
   bias <- apply(samples[1:4,],MARGIN=1,FUN=function(x){mean(x-gt)})
   sd <- apply(samples[1:4,],MARGIN=1,FUN=sd)
   rmse <- apply(samples[1:4,],MARGIN=1,FUN=function(x){sqrt(mean((x-gt)^2))})
-  table <- data.frame(estimate = rowMeans(samples[1:4,]),rmse=rmse,bias=bias,sd=sd)
+  covg <- apply(samples[6:9,],MARGIN=1,FUN = mean)
+  table <- data.frame(estimate = rowMeans(samples[1:4,]),rmse=rmse,bias=bias,sd=sd,coverage=covg)
   rownames(table) <- c("rdd_IK","rdd_AK","rdd_IW","rdd_QD")
   return(table)
 }

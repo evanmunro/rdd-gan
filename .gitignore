@@ -6,4 +6,5 @@
 *.pdf
 *.pth
 .Rhistory
-
+old/*
+data/generated/*
