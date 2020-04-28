@@ -32,6 +32,6 @@ generate_tables <- function(real_path,gen_path,n.sims=3) {
 
 generate_tables("data/cleaned/lee.csv", "data/generated/lee_generated.feather")
 
-generate_tables("data/cleaned/m_math.csv", "data/generated/mats_math_generated.feather")
+#generate_tables("data/cleaned/m_math.csv", "data/generated/mats_math_generated.feather")
 
-generate_tables("data/cleaned/jl_math.csv","data/generated/jl_math_generated.feather") 
+#generate_tables("data/cleaned/jl_math.csv","data/generated/jl_math_generated.feather") 
