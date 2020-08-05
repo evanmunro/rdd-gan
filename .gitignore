@@ -8,3 +8,4 @@
 .Rhistory
 old/*
 data/generated/*
+*.RData
