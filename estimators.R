@@ -1,8 +1,8 @@
 
 library(JuliaCall)
 
-#julia_eval("include(\"/Users/evanmunro/Documents/Github/BayesRDD/src/code/estimators/bayesrdd.jl\")")
-julia_eval("include(\"/Users/evanmunro/Documents/Github/BayesRDD/src/code/estimators/gpsimple.jl\")")
+julia_eval("include(\"/Users/evanmunro/Documents/Github/BayesRDD/src/code/estimators/bayesrdd.jl\")")
+#julia_eval("include(\"/Users/evanmunro/Documents/Github/BayesRDD/src/code/estimators/gpsimple.jl\")")
 
 rddBayesFast <- function(Y, X, c=0) {
   nfolds = ceiling(length(X)/1000)
@@ -20,8 +20,10 @@ rddKRRFast <- function(Y, X, c=0) {
   return(list(ate=mean(ates), se=0, ci.lower=0, ci.upper=0, bw=0))
 }
 
-rdd_Bayes <- function(Y, X, c=0) {
-  result <- julia_eval("gpRDDSimple")(Y, X)
+rdd_Bayes <- function(Y, X, c=0, discrete=TRUE) {
+  #result <- julia_eval("gpRDDSimple")(Y, X)
+  result <- julia_eval("bayesRDD")(Y, X)
+  print("done one")
   #print(result)
   return(list(ate=result[[1]], se=result[[2]], ci.lower=result[[3]], ci.upper=result[[4]], bw=1))
 }
