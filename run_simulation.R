@@ -18,7 +18,7 @@ table_real_estimates <- function(estimators, data)  {
   print(kable(data.frame(estimates),"latex", row.names=T, digits=3, booktabs=T))
 }
 
-generate_tables <- function(real_path, gen_path, n.sims=2, digits=NULL, small=NULL) {
+generate_tables <- function(real_path, gen_path, n.sims=200, digits=NULL, small=NULL) {
   estimators = c("rddIK", "rddLLRM", "rddLLRC", "rddIW", "rddAK", "rddQD", "rdd_Bayes")
   data <- read.csv(real_path)
   
@@ -41,10 +41,8 @@ generate_tables <- function(real_path, gen_path, n.sims=2, digits=NULL, small=NU
   gt = rddIK(gen$y,gen$x)$ate
   if(!is.null(digits)){ gen$x <- round(gen$x, digits) } 
   #gen$x = gen$x/mean(gen$x)
-  print("done gt")
   samples <- replicate(n.sims, estimate_sample(estimators, as.data.frame(gen[gen$x>0,]), as.data.frame(gen[gen$x<0,]), nrow(real.da), nrow(real.db)))
   save(samples,file='samples.RData')
-  #print(samples)
   result <- make_table(samples, gt) 
   print(kable(result, "latex", digits=4, booktabs=T))
 }
