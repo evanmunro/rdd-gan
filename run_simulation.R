@@ -11,7 +11,7 @@ table_real_estimates <- function(estimators, data)  {
   M= RDHonest::NPR_MROT.fit(RDHonest::RDData(data[,c("y","x")], cutoff=0))
   estimates = rbind(rddIK(data$y,data$x), rddLLRM(data$y, data$x), 
                     rddLLRC(data$y, data$x), rddAK(data$y,data$x, M), 
-                    rddIW(data$y,data$x, M), rddQD(data$y,data$x), rddBayes(data$y, data$x)) 
+                    rddIW(data$y,data$x, M), rddQD(data$y,data$x), rdd_Bayes(data$y, data$x)) 
   colnames(estimates) = c("estimate", "se", "ci.lower", "ci.upper", "bw")
   rownames(estimates) = estimators 
   estimates = apply(data.frame(estimates), MARGIN=2, FUN= function(x) as.numeric(x))
@@ -34,12 +34,11 @@ generate_tables <- function(real_path, gen_path, n.sims=2, digits=NULL, small=NU
   
   #data$x = data$x/mean(data$x)
   #estimate on real data 
-  #table_real_estimates(estimators, data) 
+  table_real_estimates(estimators, data) 
   
   #then run simulation 
   gen <- read_feather(gen_path)
-  #gt = rddIK(gen$y,gen$x)$ate
-  gt = 0.23 
+  gt = rddIK(gen$y,gen$x)$ate
   if(!is.null(digits)){ gen$x <- round(gen$x, digits) } 
   #gen$x = gen$x/mean(gen$x)
   print("done gt")
@@ -49,8 +48,7 @@ generate_tables <- function(real_path, gen_path, n.sims=2, digits=NULL, small=NU
   result <- make_table(samples, gt) 
   print(kable(result, "latex", digits=4, booktabs=T))
 }
-
-#generate_tables("data/cleaned/lee.csv", "data/generated/lee_generated.feather", small=NULL)
+generate_tables("data/cleaned/lee.csv", "data/generated/lee_generated.feather")
 generate_tables("data/cleaned/jl_math.csv","data/generated/jl_math_generated.feather", digits=2) 
 generate_tables("data/cleaned/m_math.csv", "data/generated/mats_math_generated.feather", digits=0) 
 #
