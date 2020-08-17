@@ -46,7 +46,7 @@ generate_tables <- function(real_path, gen_path, n.sims=200, digits=NULL, small=
   result <- make_table(samples, gt) 
   print(kable(result, "latex", digits=4, booktabs=T))
 }
-generate_tables("data/cleaned/lee.csv", "data/generated/lee_generated.feather")
-generate_tables("data/cleaned/jl_math.csv","data/generated/jl_math_generated.feather", digits=2) 
+#generate_tables("data/cleaned/lee.csv", "data/generated/lee_generated.feather")
+#generate_tables("data/cleaned/jl_math.csv","data/generated/jl_math_generated.feather", digits=2) 
 generate_tables("data/cleaned/m_math.csv", "data/generated/mats_math_generated.feather", digits=0) 
 #

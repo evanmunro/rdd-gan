@@ -22,7 +22,13 @@ rddKRRFast <- function(Y, X, c=0) {
 
 rdd_Bayes <- function(Y, X, c=0, discrete=TRUE) {
   #result <- julia_eval("gpRDDSimple")(Y, X)
-  result <- julia_eval("bayesRDD")(Y, X)
+  result <- list(0) 
+  i=1 
+  while(length(result)<4) {
+    if(i>1) print("julia error, trying again")
+    result <- julia_eval("bayesRDD")(Y, X)
+    i=i+1 
+  }
   return(list(ate=result[[1]], se=result[[2]], ci.lower=result[[3]], ci.upper=result[[4]], bw=1))
 }
 
