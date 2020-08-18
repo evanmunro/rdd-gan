@@ -18,7 +18,7 @@ run_estimate <- function(estimator, df, M) {
 }
 
 estimators = c("rddIK", "rddLLRM", "rddLLRC", "rddIW", "rddAK", "rddQD", "rddBayes")
-df <- read.csv(datapath)
+df <- read_feather(datapath)
 M <- RDHonest::NPR_MROT.fit(RDHonest::RDData(df[, c("y","x")], cutoff=0))
 estimates <- t(sapply(estimators, FUN = function(x) return(run_estimate(x, df, M))))
 
