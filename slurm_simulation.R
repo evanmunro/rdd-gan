@@ -3,7 +3,7 @@ library(feather)
 args = commandArgs(TRUE)
 name = "jl_math"
 fraction = 1
-runs = 2
+runs = 200
 
 submit_slurm <- function(name, chunkpath, runpath) {
 
@@ -14,9 +14,9 @@ submit_slurm <- function(name, chunkpath, runpath) {
    cat("#SBATCH --job-name=", dataname, ".job\n", sep="")
    cat("#SBATCH --output=.out/", dataname, ".out\n", sep="")
    cat("#SBATCH --error=.out/", dataname, ".err\n", sep="")
-   cat("#SBATCH --time=00:05:00\n")
+   cat("#SBATCH --time=00:10:00\n")
    cat("#SBATCH --mem=6GB\n")
-   cat("#SBATCH -p athey\n")
+   cat("#SBATCH -p owners\n")
    cat("module load julia\n")
    cat("module load R/3.5.1\n")
    cat("module load gcc\n")
