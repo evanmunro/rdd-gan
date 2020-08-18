@@ -8,16 +8,6 @@ outpath  = args[2]
 print(datapath)
 print(outpath)
 
-
-run_estimate <- function(estimator, df, M) {
-  if (estimator %in% c("rddAK", "rddIW")) {
-    est <- do.call(estimator, list(df$y, df$x, M=M))
-  } else {
-    est <- do.call(estimator, list(df$y, df$x))
-  }
-  return(c(ate=est$ate, ci.l=est$ci.lower, ci.u=est$ci.upper))
-}
-
 estimators = c("rddIK", "rddLLRM", "rddLLRC", "rddIW", "rddAK", "rddQD", "rddBayes")
 df <- read_feather(datapath)
 print(length(unique(df$x)))
