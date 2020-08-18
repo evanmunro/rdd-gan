@@ -21,7 +21,6 @@ outpath  = paste0("output/", name, "/")
 tablepath = paste0("tables/", name, "_sims", ".txt")
 
 files = paste0(outpath, list.files(outpath))
-print(files)
 samples <- lapply(files,
             FUN = function(x) {
                 df <- read.csv(x, header=F)
@@ -34,6 +33,7 @@ print("number of samples: ")
 print(nrow(samples)/length(estimators))
 
 df.g <- read_feather(paste0("data/generated/", name, "_generated.feather"))
+print(gt)
 gt <- rddIK(df.g$y,df.g$x)$ate
 
 results <- t(sapply(estimators, FUN = function (x) {
