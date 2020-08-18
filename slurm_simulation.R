@@ -16,7 +16,10 @@ submit_slurm <- function(name, chunkpath, runpath) {
    cat("#SBATCH --error=.out/", dataname, ".err\n", sep="")
    cat("#SBATCH --time=00:05:00\n")
    cat("#SBATCH --mem=8GB\n")
-   cat("#SBATCH -p owners\n")
+   cat("#SBATCH -p athey\n")
+   cat("module load julia\n")
+   cat("module load R/3.5.1\n")
+   cat("module load gcc\n")
    cat("Rscript run_estimators.R", chunkpath, runpath, sep=" ")
 
    # Close the sink!
