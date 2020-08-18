@@ -8,6 +8,7 @@ outpath  = args[2]
 print(datapath)
 print(outpath)
 
+
 run_estimate <- function(estimator, df, M) {
   if (estimator %in% c("rddAK", "rddIW")) {
     est <- do.call(estimator, list(df$y, df$x, M=M))
@@ -19,6 +20,7 @@ run_estimate <- function(estimator, df, M) {
 
 estimators = c("rddIK", "rddLLRM", "rddLLRC", "rddIW", "rddAK", "rddQD", "rddBayes")
 df <- read_feather(datapath)
+print(length(unique(df$x)))
 M <- RDHonest::NPR_MROT.fit(RDHonest::RDData(df[, c("y","x")], cutoff=0))
 estimates <- t(sapply(estimators, FUN = function(x) return(run_estimate(x, df, M))))
 

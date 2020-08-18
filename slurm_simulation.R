@@ -1,9 +1,9 @@
 library(feather)
 
 args = commandArgs(TRUE)
-name = "jl_math"
+name = "mats_math"
 fraction = 1
-runs = 200
+runs = 2
 
 submit_slurm <- function(name, chunkpath, runpath) {
 
