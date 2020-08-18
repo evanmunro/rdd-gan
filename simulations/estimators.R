@@ -22,7 +22,7 @@ rddKRRFast <- function(Y, X, c=0) {
 
 rddBayes <- function(Y, X, c=0, discrete=TRUE) {
   #result <- julia_eval("gpRDDSimple")(Y, X)
-  start_time = Sys.time()
+  #start_time = Sys.time()
   result <- list(0)
   i=1
   while(length(result)<4) {
@@ -30,9 +30,9 @@ rddBayes <- function(Y, X, c=0, discrete=TRUE) {
     result <- julia_eval("bayesRDD")(Y, X)
     i=i+1
   }
-  end_time = Sys.time()
-  print("Bayes")
-  print(end_time - start_time)
+ # end_time = Sys.time()
+  #print("Bayes")
+  #print(end_time - start_time)
   return(list(ate=result[[1]], se=result[[2]], ci.lower=result[[3]], ci.upper=result[[4]], bw=1))
 }
 
@@ -78,7 +78,7 @@ rddLLRC <- function(Y, X, c=0) {
 }
 
 rddIW <- function(Y, X, M, c=0) {
-  start_time = Sys.time()
+  #start_time = Sys.time()
   W = as.numeric(X>c)
   model <-  optrdd::optrdd(X,Y,W,
               max.second.derivative=M,verbose=F,estimation.point=c,
@@ -86,21 +86,21 @@ rddIW <- function(Y, X, M, c=0) {
   ate <- model$tau.hat
   se <- model$sampling.se
   ci <- model$tau.hat +c(-1,1)*model$tau.plusminus
-  end_time = Sys.time()
+  #end_time = Sys.time()
   print("IW")
-  print(end_time - start_time)
+  #print(end_time - start_time)
   return(list(ate=ate,se=se,ci.lower=ci[1],ci.upper=ci[2],bw=0))
 }
 
 rddAK <- function(Y, X, M, c=0) {
-  start_time = Sys.time()
+  #start_time = Sys.time()
   model <- RDHonest::RDHonest(y~x,data=data.frame(y=Y,x=X),cutoff=c,M=M,kern="triangular",opt.criterion="MSE",sclass="T")
   ate <- model$estimate
   se <- as.numeric(model$sd)
   ci <- c(as.numeric(model$lower),as.numeric(model$upper))
   print("AK")
-  end_time = Sys.time()
-  print(end_time - start_time)
+ # end_time = Sys.time()
+  #print(end_time - start_time)
   return(list(ate=ate, se=se, ci.lower=ci[1], ci.upper=ci[2], bw=model$hp))
 }
 
