@@ -40,7 +40,7 @@ dfg= read_feather(genpath)
 if (name=="jl_math"){
    dfg$x = round(dfg$x, 2)
 }
-if (name=="m_math"){
+if (name=="mats_math"){
    dfg$x = round(dfg$x, 0)
 }
 df.ga = dfg[dfg$x>0, ]
