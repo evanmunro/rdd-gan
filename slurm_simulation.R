@@ -5,7 +5,7 @@ name = "jl_math"
 fraction = 1
 runs = 2
 
-function submit_slurm(name, chunkpath, runpath) {
+submit_slurm <- function(name, chunkpath, runpath) {
 
    sink(paste(".job/", name,'.job',sep=""))
 
@@ -21,7 +21,6 @@ function submit_slurm(name, chunkpath, runpath) {
 
    # Close the sink!
    sink()
-
    # Submit to run on cluster
    system(paste("sbatch",paste(".job/", name, ".job",sep="")))
 
