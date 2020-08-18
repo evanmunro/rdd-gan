@@ -15,7 +15,7 @@ submit_slurm <- function(name, chunkpath, runpath) {
    cat("#SBATCH --output=.out/", dataname, ".out\n", sep="")
    cat("#SBATCH --error=.out/", dataname, ".err\n", sep="")
    cat("#SBATCH --time=00:05:00\n")
-   cat("#SBATCH --mem=8GB\n")
+   cat("#SBATCH --mem=6GB\n")
    cat("#SBATCH -p athey\n")
    cat("module load julia\n")
    cat("module load R/3.5.1\n")
@@ -36,6 +36,13 @@ dfr= read.csv(cleanpath)
 na = floor(length(dfr$x[dfr$x>0])*fraction)
 nb = floor(length(dfr$x[dfr$x<=0])*fraction)
 dfg= read_feather(genpath)
+
+if (name=="jl_math"){
+   dfg$x = round(dfg$x, 2)
+}
+if (name=="m_math"){
+   dfg$x = round(dfg$x, 0)
+}
 df.ga = dfg[dfg$x>0, ]
 df.gb = dfg[dfg$x<=0, ]
 

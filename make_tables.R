@@ -6,4 +6,5 @@ estimators = c("rddIK", "rddLLRM", "rddLLRC", "rddIW", "rddAK", "rddQD", "rddBay
 outpath  = paste0("output/", outname)
 tablepath = paste0("tables/", tablename)
 
+file_list = 
 rbind()
