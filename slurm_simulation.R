@@ -27,7 +27,7 @@ submit_slurm <- function(name, chunkpath, runpath) {
 }
 
 cleanpath = paste0("data/cleaned/", name, ".csv")
-genpath = paste0("data/generated/", name, ".feather")
+genpath = paste0("data/generated/", name, "_generated", ".feather")
 
 dfr= read.csv(cleanpath)
 na = floor(length(dfr$x[dfr$x>0])*fraction)
