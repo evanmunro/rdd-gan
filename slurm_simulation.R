@@ -38,13 +38,13 @@ df.gb = dfg[dfg$x<=0, ]
 
 for (i in 1:runs) {
   dataname = paste0(name, "_", sample(1:100000))
-  chunkpath = paste0("data/chunks", dataname, ".feather")
+  chunkpath = paste0("data/chunks/", dataname, ".feather")
   outpath = paste0("output/", name, "/", dataname, "run.csv\n")
 
   dfa <- df.ga[sample(1:nrow(df.ga), na), ]
   dfb <- df.gb[sample(1:nrow(df.gb), nb), ]
   df <- data.frame(rbind(dfa, dfb))
-
-  write_feather(df, chunkpath)
+  print(chunkpath)
+  write_feather(df, path=chunkpath)
   submit_slurm(name, chunkpath, runpath)
 }
