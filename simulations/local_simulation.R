@@ -19,9 +19,9 @@ table_real_estimates <- function(estimators, data)  {
   print(kable(data.frame(estimates),"latex", row.names=T, digits=3, booktabs=T))
 }
 
-generate_tables <- function(real_path, gen_path, n.sims=20, digits=NULL, small=NULL) {
+generate_tables <- function(real_path, gen_path, n.sims=5, digits=NULL, small=NULL) {
   #estimators = c("rddIK", "rddLLRM", "rddLLRC", "rddIW", "rddAK", "rddQD")
-  estimators = c("rddIK", "rddIW", "rddAK")
+  estimators = c("rddIK",  "rddAK")
   data <- read.csv(real_path)
   
   if(!is.null(small)) {

@@ -1,7 +1,7 @@
 
-library(JuliaCall)
+#library(JuliaCall)
 
-julia_eval("include(\"../BayesRDD/src/code/estimators/bayesrdd.jl\")")
+#julia_eval("include(\"../BayesRDD/src/code/estimators/bayesrdd.jl\")")
 #julia_eval("include(\"../BayesRDD/src/code/estimators/gpsimple.jl\")")
 
 global_M <- function(df) { 
@@ -11,8 +11,12 @@ global_M <- function(df) {
   return(f2(df$x))
 }
 
-select_M(dfa, dfb, bw) {
-  
+select_M<- function(da, db, bw) {
+  a2 = global_M(da) 
+  b2 = global_M(db) 
+  Ma = max(a2[abs(da$x)<bw])
+  Mb = max(b2[abs(db$x)<bw])
+  return(max(Ma, Mb))
 }
 
 rddBayesFast <- function(Y, X, c=0) {
@@ -132,7 +136,10 @@ estimate_sample <- function(estimators, dfa, dfb, na, nb, gt) {
   dfb <- dfb[sample(1:nrow(dfb), nb), ]
   df <- data.frame(rbind(dfa, dfb))
   #M <- RDHonest::NPR_MROT.fit(RDHonest::RDData(df[, c("y","x")], cutoff=0))/20
-  M <- max(global_M(dfa), global-M(dfb))
+  rd <- rddtools::rdd_data(x=df$x, y=df$y, cutpoint=0)
+  bw <- rddtools::rdd_bw_ik(rd)
+  M <- select_M(dfa, dfb, bw)
+  print(M)
   estimates <- sapply(estimators, FUN = function(x) return(run_estimate(x, df, M)))
   return(estimates)
 }
