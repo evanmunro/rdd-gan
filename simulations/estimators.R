@@ -2,7 +2,18 @@
 library(JuliaCall)
 
 julia_eval("include(\"../BayesRDD/src/code/estimators/bayesrdd.jl\")")
-#julia_eval("include(\"/Users/evanmunro/Documents/Github/BayesRDD/src/code/estimators/gpsimple.jl\")")
+#julia_eval("include(\"../BayesRDD/src/code/estimators/gpsimple.jl\")")
+
+global_M <- function(df) { 
+  model <- stats::lm(df$y ~ 0 + outer(df$x, 0:4, "^"))
+  r1 <- unname(model$coefficients)
+  f2 <- function(x) abs(2*r1[3]+6*x*r1[4]+12*x^2*r1[5])
+  return(f2(df$x))
+}
+
+select_M(dfa, dfb, bw) {
+  
+}
 
 rddBayesFast <- function(Y, X, c=0) {
   nfolds = ceiling(length(X)/1000)
@@ -31,7 +42,7 @@ rddBayes <- function(Y, X, c=0, discrete=TRUE) {
     i=i+1
   }
  # end_time = Sys.time()
-  #print("Bayes")
+  print("Bayes")
   #print(end_time - start_time)
   return(list(ate=result[[1]], se=result[[2]], ci.lower=result[[3]], ci.upper=result[[4]], bw=1))
 }
@@ -87,7 +98,7 @@ rddIW <- function(Y, X, M, c=0) {
   se <- model$sampling.se
   ci <- model$tau.hat +c(-1,1)*model$tau.plusminus
   #end_time = Sys.time()
-  print("IW")
+  #print("IW")
   #print(end_time - start_time)
   return(list(ate=ate,se=se,ci.lower=ci[1],ci.upper=ci[2],bw=0))
 }
@@ -98,7 +109,7 @@ rddAK <- function(Y, X, M, c=0) {
   ate <- model$estimate
   se <- as.numeric(model$sd)
   ci <- c(as.numeric(model$lower),as.numeric(model$upper))
-  print("AK")
+  #print("AK")
  # end_time = Sys.time()
   #print(end_time - start_time)
   return(list(ate=ate, se=se, ci.lower=ci[1], ci.upper=ci[2], bw=model$hp))
@@ -120,9 +131,28 @@ estimate_sample <- function(estimators, dfa, dfb, na, nb, gt) {
   dfa <- dfa[sample(1:nrow(dfa), na), ]
   dfb <- dfb[sample(1:nrow(dfb), nb), ]
   df <- data.frame(rbind(dfa, dfb))
-  M <- RDHonest::NPR_MROT.fit(RDHonest::RDData(df[, c("y","x")], cutoff=0))
+  #M <- RDHonest::NPR_MROT.fit(RDHonest::RDData(df[, c("y","x")], cutoff=0))/20
+  M <- max(global_M(dfa), global-M(dfb))
   estimates <- sapply(estimators, FUN = function(x) return(run_estimate(x, df, M)))
   return(estimates)
+}
+
+save_generated_sample <- function(gen_path, real_path, name) {
+    gen <- read_feather(gen_path)
+    real <- read.csv(real_path)
+    real.da <- real[real$x>0, ]
+    real.db <- real[real$x<=0, ]
+    ga <- as.data.frame(gen[gen$x>0,])
+    gb <- as.data.frame(gen[gen$x<0,])
+    na = nrow(real.da)
+    nb = nrow(real.db)
+    print(na)
+    print(nb)
+    dfa <- ga[sample(1:nrow(ga), na), ]
+    dfb <- gb[sample(1:nrow(gb), nb), ]
+    df <- data.frame(rbind(dfa, dfb))
+    print(dim(df))
+    write.csv(df, file=name, row.names=F)
 }
 
 run_estimate <- function(estimator, df, M) {

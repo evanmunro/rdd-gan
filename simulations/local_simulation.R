@@ -1,6 +1,6 @@
 startbig = Sys.time() 
-setwd("/scratch/users/munro/rdd-gan")
-source("estimators.R")
+setwd("~/Documents/GitHub/rdd-gan/")
+source("simulations/estimators.R")
 library(future.apply)
 library(ggplot2)
 library(feather) 
@@ -19,8 +19,9 @@ table_real_estimates <- function(estimators, data)  {
   print(kable(data.frame(estimates),"latex", row.names=T, digits=3, booktabs=T))
 }
 
-generate_tables <- function(real_path, gen_path, n.sims=200, digits=NULL, small=NULL) {
-  estimators = c("rddIK", "rddLLRM", "rddLLRC", "rddIW", "rddAK", "rddQD", "rddBayes")
+generate_tables <- function(real_path, gen_path, n.sims=20, digits=NULL, small=NULL) {
+  #estimators = c("rddIK", "rddLLRM", "rddLLRC", "rddIW", "rddAK", "rddQD")
+  estimators = c("rddIK", "rddIW", "rddAK")
   data <- read.csv(real_path)
   
   if(!is.null(small)) {
@@ -42,7 +43,7 @@ generate_tables <- function(real_path, gen_path, n.sims=200, digits=NULL, small=
   gt = rddIK(gen$y,gen$x)$ate
   if(!is.null(digits)){ gen$x <- round(gen$x, digits) } 
   #gen$x = gen$x/mean(gen$x)
-  samples <- replicate(n.sims, estimate_sample(estimators, as.data.frame(gen[gen$x>0,]), as.data.frame(gen[gen$x<0,]), floor(nrow(real.da)/60), floor(nrow(real.db)/60)))
+  samples <- replicate(n.sims, estimate_sample(estimators, as.data.frame(gen[gen$x>0,]), as.data.frame(gen[gen$x<0,]), floor(nrow(real.da)), floor(nrow(real.db))))
   save(samples,file='samples.RData')
   result <- make_table(samples, gt) 
   print(kable(result, "latex", digits=4, booktabs=T))
