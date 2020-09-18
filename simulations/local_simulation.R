@@ -1,5 +1,5 @@
 startbig = Sys.time() 
-setwd("~/Documents/GitHub/rdd-gan/")
+setwd("~/Documents/rdd-gan/")
 source("simulations/estimators.R")
 library(future.apply)
 library(ggplot2)
