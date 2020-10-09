@@ -109,7 +109,7 @@ rddIW <- function(Y, X, M, c=0) {
 
 rddAK <- function(Y, X, M, c=0) {
   #start_time = Sys.time()
-  model <- RDHonest::RDHonest(y~x,data=data.frame(y=Y,x=X),cutoff=c,M=M,kern="triangular",opt.criterion="MSE",sclass="T")
+  model <- RDHonest::RDHonest(y~x,data=data.frame(y=Y,x=X),cutoff=c,M=M,kern="optimal",opt.criterion="MSE",sclass="T")
   ate <- model$estimate
   se <- as.numeric(model$sd)
   ci <- c(as.numeric(model$lower),as.numeric(model$upper))
