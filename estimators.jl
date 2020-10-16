@@ -1,16 +1,28 @@
-using RCall, LinearAlgebra
+using RCall, LinearAlgebra, GLM
 using Suppressor
 include("rdddata.jl")
 
 R"library(optrdd)"
 
-function optrdd(data::RDData, sigma_sq, B, ret_weights=false)
-	x = data.x; y = data.y; c = 0; w = x .>= 0
-	@rput x; @rput y; @rput c; @rput w; @rput B; @rput sigma_sq
+function estimate_B2(x, y)
+	@rput x; @rput y;
+	@suppress R"""
+		B = RDHonest::NPR_MROT.fit(RDHonest::RDData(data.frame(y=y, x=x), cutoff=0))
+	"""
+	@rget B
+end
+
+function optrdd_R(x, y, ret_weights=false)
+	c = 0; w = x .>= 0
+	B = estimate_B2(x, y)
+	sigma2 = estimate_σ2(x, y)
+	@rput x; @rput y; @rput B; @rput c; @rput w; @rput sigma2;
 	@suppress R"""
 		out = optrdd(X=x, W=w, Y=y, estimation.point=c,
-					max.second.derivative=B, sigma.sq=sigma_sq,
-					optimizer="quadprog", verbose=FALSE)
+					max.second.derivative=B, sigma.sq=sigma2,
+					optimizer="mosek", use.spline=FALSE, try.elnet.for.sigma.sq=FALSE,
+					num.bucket=2000,
+					verbose=FALSE)
 		tau = out[["tau.hat"]]
 	"""
 	@rget tau
@@ -27,8 +39,8 @@ end
 triangular_kernel(u) = (abs(u) <= 1)*(1-abs(u))
 
 # NOTE: only implemented for triangular kernel right now
-function compute_opt_bw(data::RDData)
-	x = data.x; y = data.y; c = 0
+function compute_opt_bw(x, y)
+	c=0
 	@rput x; @rput y; @rput c
 	R"""
 		bw_selection = rdrobust::rdbwselect_2014(y, x, c=c, bwselect="IK")
@@ -38,9 +50,9 @@ function compute_opt_bw(data::RDData)
 	return opt_bw[1]
 end
 
-function llrrdd(data::RDData, kernel, bw, ret_weights=false)
-	x = data.x; y = data.y; c=0
-	n = length(data.x)
+function llrrdd(x, y, kernel, bw, ret_weights=false)
+	c=0
+	n = length(x)
 	@rput y; @rput x; @rput c; @rput bw
 	R"""
 		model <- rdd::RDestimate(y~x, data.frame(y=y, x=x), cutpoint=c, bw=bw)
@@ -48,7 +60,7 @@ function llrrdd(data::RDData, kernel, bw, ret_weights=false)
 	"""
 	@rget est
 	if ret_weights
-		Δ = data.x .- c; w = data.x .>= c
+		Δ = x .- c; w = x .>= c
 		X = [ones(n) w min.(Δ, 0) max.(Δ, 0)]
 		K = Diagonal(kernel.(abs.(Δ)./bw))
 		H = inv(X'*K*X)*X'*K
