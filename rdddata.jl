@@ -17,7 +17,9 @@ function DiscretizedRunningVariable(x, num_buckets)
 	xmax = maximum(x)
  	xmin = minimum(x)
 	h = (xmax - xmin)/num_buckets
-	grid = vcat(reverse(0:-h:(xmin-h)), 0:h:(xmax+h))
+	grid = (xmin-h/2):h:(xmax+h)
+	grid = vcat(grid, repeat([0], 2 - sum(grid.==0)))
+	sort!(grid)
 	xx = midpoints(grid)
 	h  = xx[2:length(xx)] .- xx[1:(length(xx)-1)]
 	ixc = argmin(abs.(xx))

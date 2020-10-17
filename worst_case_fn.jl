@@ -12,7 +12,7 @@ import RegressionDiscontinuity
 
 #end
 
-function worst_case_mu(rd::RegressionDiscontinuity.RDData, γ0, γ1, M1, M2, first_deriv=true)
+function worst_case_mu(x, y, γ, M2)
     model =  Model(Gurobi.Optimizer)
     @variable(model, mu0[1:rd.d0])
     @variable(model, mu1[1:rd.d1])
