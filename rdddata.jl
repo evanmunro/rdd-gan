@@ -13,7 +13,7 @@ function support(xx::DiscretizedRunningVariable)
 	return midpoints(xx.grid)
 end
 
-function DiscretizedRunningVariable(x, num_buckets=2000.0)
+function DiscretizedRunningVariable(x, num_buckets)
 	xmax = maximum(x)
  	xmin = minimum(x)
 	h = (xmax - xmin)/num_buckets

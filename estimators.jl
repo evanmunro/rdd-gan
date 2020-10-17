@@ -21,7 +21,6 @@ function optrdd_R(x, y, ret_weights=false)
 		out = optrdd(X=x, W=w, Y=y, estimation.point=c,
 					max.second.derivative=B, sigma.sq=sigma2,
 					optimizer="mosek", use.spline=FALSE, try.elnet.for.sigma.sq=FALSE,
-					num.bucket=2000,
 					verbose=FALSE)
 		tau = out[["tau.hat"]]
 	"""

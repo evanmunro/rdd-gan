@@ -2,21 +2,12 @@
 using JuMP, MosekTools
 
 include("estimators.jl")
+include("rdddata.jl")
 
-#unction add_value_bounds(model, variable, y)
-#end
-
-#function add_monotonicity_bounds(model, variable, M1, y)
-#end
-
-function add_second_derivative_bounds(model, variable, M1)
-
-end
-
-function optrdd(x, y)
+function optrdd(x, y, num_buckets=10000.0)
     B = estimate_B2(x, y)
-    xdiscr = DiscretizedRunningVariable(x)
-    X = support(xdiscr); h = xdiscr.h; d = length(x); n= xdiscr.weights; ixc = xdiscr.ixc
+    xdiscr = DiscretizedRunningVariable(x, num_buckets)
+    X = support(xdiscr); h = xdiscr.h; d = length(X); n= xdiscr.weights; ixc = xdiscr.ixc
     c = 0.0; W = X .> c
     σ2 = zeros(d) .+ estimate_σ2(x ,y)
     model =  Model(Mosek.Optimizer)
@@ -40,9 +31,8 @@ function optrdd(x, y)
     #end
 
     @constraint(model, f[ixc] ==0)
-
-    @constraint(model, (f[ixc] - f[ixc-1])/(h[ixc]) == 0)
-    @constraint(model, (f1[ixc+1] - f1[ixc])/(h/2) == 0)
+    @constraint(model, (f[ixc] - f[ixc-1])/h[ixc] == 0)
+    @constraint(model, (f[ixc+1] - f[ixc])/h[ixc] == 0)
 
     #for i in 2:d
     #    @constraint(model, (f1[i] - f1[i-1])/h - l1*2 <=0)
@@ -52,10 +42,10 @@ function optrdd(x, y)
     #end
 
     for i in 3:d
-        @constraint(model, (f1[i] - 2*f1[i-1] + f1[i-2])/h^2 - l1 <=0)
-        @constraint(model, (f1[i] - 2*f1[i-1] + f1[i-2])/h^2 + l1 >=0)
-        @constraint(model, (f0[i] - 2*f0[i-1] + f0[i-2])/h^2 - l1 <=0)
-        @constraint(model, (f0[i] - 2*f0[i-1] + f0[i-2])/h^2 + l1 >=0)
+        @constraint(model, (f[i] - 2*f[i-1] + f[i-2])/(h[i-1]*h[i-2]) - l1 <=0)
+        @constraint(model, (f[i] - 2*f[i-1] + f[i-2])/(h[i-1]*h[i-2]) + l1 >=0)
+        #@constraint(model, (f0[i] - 2*f0[i-1] + f0[i-2])/h^2 - l1 <=0)
+        #@constraint(model, (f0[i] - 2*f0[i-1] + f0[i-2])/h^2 + l1 >=0)
     end
 
     @objective(model, Min, 1/4*(sum(n[i]*G[i]^2/σ2[i] for i in 1:d)) + l1^2 - l2 + l3)
@@ -67,12 +57,8 @@ function optrdd(x, y)
     println("l4: ", value(l4))
     println("l5: ", value(l5))
     println("obj: ", objective_value(model))
-    γ_xx = -value.(G)./(2 .*σ2)
 
-    γ = zeros(length(x))
-    for i in 1:length(x)
-        j = argmin(abs.(x[i] .- xx))
-        γ[i] = γ_xx[j]
-    end
+    γ_xx = -value.(G)./(2 .*σ2)
+    γ = γ_xx[xdiscr.xmap]
     return (τ = sum(γ.*y), γ = γ)
 end

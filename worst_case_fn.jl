@@ -1,6 +1,17 @@
 using JuMP, Ipopt
 import RegressionDiscontinuity
 
+
+#unction add_value_bounds(model, variable, y)
+#end
+
+#function add_monotonicity_bounds(model, variable, M1, y)
+#end
+
+#function add_second_derivative_bounds(model, variable, M1)
+
+#end
+
 function worst_case_mu(rd::RegressionDiscontinuity.RDData, γ0, γ1, M1, M2, first_deriv=true)
     model =  Model(Gurobi.Optimizer)
     @variable(model, mu0[1:rd.d0])
