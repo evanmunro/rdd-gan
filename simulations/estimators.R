@@ -4,7 +4,7 @@
 #julia_eval("include(\"../BayesRDD/src/code/estimators/bayesrdd.jl\")")
 #julia_eval("include(\"../BayesRDD/src/code/estimators/gpsimple.jl\")")
 
-global_M <- function(df) { 
+global_M <- function(df) {
   model <- stats::lm(df$y ~ 0 + outer(df$x, 0:4, "^"))
   r1 <- unname(model$coefficients)
   f2 <- function(x) abs(2*r1[3]+6*x*r1[4]+12*x^2*r1[5])
@@ -12,8 +12,8 @@ global_M <- function(df) {
 }
 
 select_M<- function(da, db, bw) {
-  a2 = global_M(da) 
-  b2 = global_M(db) 
+  a2 = global_M(da)
+  b2 = global_M(db)
   Ma = max(a2[abs(da$x)<bw])
   Mb = max(b2[abs(db$x)<bw])
   return(max(Ma, Mb))
@@ -119,6 +119,33 @@ rddAK <- function(Y, X, M, c=0) {
   return(list(ate=ate, se=se, ci.lower=ci[1], ci.upper=ci[2], bw=model$hp))
 }
 
+
+nn = function(Y, X, X_eval, probs=F, hidden=c(32, 8),
+              l2=0.01, n_batch=128, n_epochs=50, lr=1e-3, ...) {
+  if (probs) Y = as.character(Y)
+  net = ANN2::neuralnetwork(X, Y, hidden.layers = hidden,
+                           regression = !probs,
+                           standardize = TRUE,
+                           loss.type = ifelse(probs, "log", "squared"),
+                           activ.functions = "relu",
+                           optim.type = "adam",
+                           L2 = l2,
+                           batch.size = n_batch,
+                           n.epochs = n_epochs,
+                           verbose = F,
+                           learn.rates = lr, ...)
+  if (probs) return(predict(net, X_eval)$probabilities[, "class_1"])
+  if (!probs) return(predict(net, X_eval)$predictions)
+}
+
+rddNN <- function(Y, X, M) {
+  mu1 = nn(Y[X>0], X[X>0], c(0))
+  mu0 = nn(Y[X<0], X[X<0], c(0))
+  return(list(ate = mu1-mu0, se=0, ci.lower = 0, ci.upper = 0, bw =0 ))
+}
+
+
+
 #local quadratic with bias correction, MSE optimal bandwidth
 rddQD<- function(Y, X, c=0) {
   sink("/dev/null")
@@ -139,7 +166,6 @@ estimate_sample <- function(estimators, dfa, dfb, na, nb, gt) {
   rd <- rddtools::rdd_data(x=df$x, y=df$y, cutpoint=0)
   bw <- rddtools::rdd_bw_ik(rd)
   M <- select_M(dfa, dfb, bw)
-  print(M)
   estimates <- sapply(estimators, FUN = function(x) return(run_estimate(x, df, M)))
   return(estimates)
 }

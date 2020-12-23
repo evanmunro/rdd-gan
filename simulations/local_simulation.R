@@ -1,5 +1,5 @@
 startbig = Sys.time() 
-setwd("~/Documents/rdd-gan/")
+setwd("~/Documents/Github/rdd-gan/")
 source("simulations/estimators.R")
 library(future.apply)
 library(ggplot2)
@@ -19,9 +19,9 @@ table_real_estimates <- function(estimators, data)  {
   print(kable(data.frame(estimates),"latex", row.names=T, digits=3, booktabs=T))
 }
 
-generate_tables <- function(real_path, gen_path, n.sims=5, digits=NULL, small=NULL) {
+generate_tables <- function(real_path, gen_path, n.sims=10, digits=NULL, small=NULL) {
   #estimators = c("rddIK", "rddLLRM", "rddLLRC", "rddIW", "rddAK", "rddQD")
-  estimators = c("rddIK",  "rddAK")
+  estimators = c("rddIK",  "rddAK", "rddNN")
   data <- read.csv(real_path)
   
   if(!is.null(small)) {
