@@ -32,7 +32,7 @@ sample_data(df) = vcat(df[sample(idx1, n1, replace=false), :],
                        df[sample(idx0, n0, replace=false), :] )
 
 #println("tau: ", result.τ)
-estimators = ["LLR", "OPT", "ADAPT"]
+estimators = ["LLR", "OPT", "CV"]
 nestimators = length(estimators)
 nsims = 100
 t_est = zeros(nsims, nestimators)
@@ -40,10 +40,10 @@ t_est = zeros(nsims, nestimators)
 
 for i in 1:nsims
     data = sample_data(df)
-    #t_est[i, 1] = llrrdd(data.x, data.y, triangular_kernel, compute_opt_bw(data.x, data.y), false)
-    t_est[i, 1] = rddConstant(data.y, data.x)
-    t_est[i, 2] = optrdd(data.x, data.y).τ
-    t_est[i, 3] = rddLasso(data.y, data.x)
+    t_est[i, 1] = llrrdd(data.x, data.y, triangular_kernel, compute_opt_bw(data.x, data.y), false)
+    #t_est[i, 1] = rddCV(data.y, data.x)
+    t_est[i, 2] = rbwRDD(data.y, data.x)
+    t_est[i, 3] = rddCV(data.y, data.x)
     println(t_est[i,:])
 end
 
