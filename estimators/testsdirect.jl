@@ -1,8 +1,8 @@
 using CSV, DataFrames
 includet("directrdd.jl")
 
-data = DataFrame(CSV.File("../data/cleaned/mats_math.csv"))
-data = first(data, 500)
+data = DataFrame(CSV.File("../data/cleaned/lee.csv"))
+#data = first(data, 500)
 
 rddCV(data.y, data.x)
 

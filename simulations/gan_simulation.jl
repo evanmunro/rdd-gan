@@ -4,8 +4,8 @@ includet("../../MinMaxRDD/optrdd.jl")
 includet("../estimators/directrdd.jl")
 #include("adaptiveminmax.jl")
 
-dataset = "lee"
-digits = nothing
+dataset = "jl_math"
+digits = 2
 gen_path = string("../data/generated/", dataset, "_generated.feather")
 real_path = string("../data/cleaned/", dataset, ".csv")
 
@@ -42,7 +42,7 @@ for i in 1:nsims
     data = sample_data(df)
     t_est[i, 1] = llrrdd(data.x, data.y, triangular_kernel, compute_opt_bw(data.x, data.y), false)
     #t_est[i, 1] = rddCV(data.y, data.x)
-    t_est[i, 2] = rbwRDD(data.y, data.x)
+    #t_est[i, 2] = rbwRDD(data.y, data.x)
     t_est[i, 3] = rddCV(data.y, data.x)
     println(t_est[i,:])
 end
