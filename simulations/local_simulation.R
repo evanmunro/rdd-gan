@@ -19,9 +19,9 @@ table_real_estimates <- function(estimators, data)  {
   print(kable(data.frame(estimates),"latex", row.names=T, digits=3, booktabs=T))
 }
 
-generate_tables <- function(real_path, gen_path, n.sims=10, digits=NULL, small=NULL) {
+generate_tables <- function(real_path, gen_path, n.sims=1000, digits=NULL, small=NULL) {
   #estimators = c("rddIK", "rddLLRM", "rddLLRC", "rddIW", "rddAK", "rddQD")
-  estimators = c("rddIK",  "rddAK", "rddNN")
+  estimators = c("rddIK", "rddGAM")
   data <- read.csv(real_path)
   
   if(!is.null(small)) {
@@ -40,7 +40,10 @@ generate_tables <- function(real_path, gen_path, n.sims=10, digits=NULL, small=N
   
   #then run simulation 
   gen <- read_feather(gen_path)
+
   gt = rddIK(gen$y,gen$x)$ate
+  #gt = 0.09355846
+  print(gt)
   if(!is.null(digits)){ gen$x <- round(gen$x, digits) } 
   #gen$x = gen$x/mean(gen$x)
   samples <- replicate(n.sims, estimate_sample(estimators, as.data.frame(gen[gen$x>0,]), as.data.frame(gen[gen$x<0,]), floor(nrow(real.da)), floor(nrow(real.db))))
@@ -49,7 +52,7 @@ generate_tables <- function(real_path, gen_path, n.sims=10, digits=NULL, small=N
   print(kable(result, "latex", digits=4, booktabs=T))
 }
 generate_tables("data/cleaned/lee.csv", "data/generated/lee_generated.feather")
-#generate_tables("data/cleaned/m_math.csv", "data/generated/mats_math_generated.feather", digits=0)
-#generate_tables("data/cleaned/jl_math.csv","data/generated/jl_math_generated.feather", digits=2) 
+generate_tables("data/cleaned/m_math.csv", "data/generated/m_math_generated.feather", digits=0)
+generate_tables("data/cleaned/jl_math.csv","data/generated/jl_math_generated.feather", digits=2) 
  
-#
+#beat on 

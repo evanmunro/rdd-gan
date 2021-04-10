@@ -80,6 +80,37 @@ rddLLRM <- function(Y, X, c=0) {
   return(list(ate=ate, se=se, ci.lower=ci.lower, ci.upper=ci.upper, bw=model$bws['h','left']))
 }
 
+#re seems to work best 
+gamfit <- function(y, x, xpred) { 
+  #model <- gam(y ~ s(x, k=30, bs="re"), data = data.frame(y=y, x=x), method="ML")
+  model <- gam(y ~ s(x, k=20), data = data.frame(y=y, x=x), method="REML")
+  #print(gam.check(model))
+  return(predict(model, newdata=data.frame(x=xpred)))
+}
+
+boostfit <- function(y, x, xpred){
+  gam2 <- gamboost(y ~ bols(x) + bbs(x), data  = data.frame(y=y, x=x), 
+                   ctrl <- boost_control(mstop = 200))
+  cvm <- cvrisk(gam2)
+  model <- gam2[ mstop(cvm) ]
+  return(predict(model, newdata=data.frame(x=xpred)))
+}
+
+rddBOOST <- function(Y, X, c=0){
+  Y = Y[abs(X) < median(abs(X))]
+  X = X[abs(X) < median(abs(X))]
+  mu1 = boostfit(Y[X>0], X[X>0], c(0))
+  mu0 = boostfit(Y[X<0], X[X<0], c(0))
+  return(list(ate=mu1-mu0, se=0, ci.lower = 0, ci.upper = 0, bw =0 ))
+}
+
+rddGAM <- function(Y, X, c=0) {
+  Y = Y[abs(X) < median(abs(X))]
+  X = X[abs(X) < median(abs(X))]
+  mu1 = gamfit(Y[X>0], X[X>0], c(0))
+  mu0 = gamfit(Y[X<0], X[X<0], c(0))
+  return(list(ate=mu1-mu0, se=0, ci.lower = 0, ci.upper = 0, bw =0 ))
+}
 #coverage optimal local linear regression
 rddLLRC <- function(Y, X, c=0) {
   sink("/dev/null")
@@ -159,6 +190,7 @@ rddQD<- function(Y, X, c=0) {
 }
 
 estimate_sample <- function(estimators, dfa, dfb, na, nb, gt) {
+  print("1")
   dfa <- dfa[sample(1:nrow(dfa), na), ]
   dfb <- dfb[sample(1:nrow(dfb), nb), ]
   df <- data.frame(rbind(dfa, dfb))

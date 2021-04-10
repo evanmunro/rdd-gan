@@ -4,8 +4,8 @@ includet("../../MinMaxRDD/optrdd.jl")
 includet("../estimators/directrdd.jl")
 #include("adaptiveminmax.jl")
 
-dataset = "jl_math"
-digits = 2
+dataset = "lee"
+digits = nothing
 gen_path = string("../data/generated/", dataset, "_generated.feather")
 real_path = string("../data/cleaned/", dataset, ".csv")
 
@@ -32,7 +32,7 @@ sample_data(df) = vcat(df[sample(idx1, n1, replace=false), :],
                        df[sample(idx0, n0, replace=false), :] )
 
 #println("tau: ", result.τ)
-estimators = ["LLR", "OPT", "CV"]
+estimators = ["LLR", "CV-LM", "CV-NEW"]
 nestimators = length(estimators)
 nsims = 100
 t_est = zeros(nsims, nestimators)
@@ -42,8 +42,8 @@ for i in 1:nsims
     data = sample_data(df)
     t_est[i, 1] = llrrdd(data.x, data.y, triangular_kernel, compute_opt_bw(data.x, data.y), false)
     #t_est[i, 1] = rddCV(data.y, data.x)
-    #t_est[i, 2] = rbwRDD(data.y, data.x)
-    t_est[i, 3] = rddCV(data.y, data.x)
+    t_est[i, 2] = llrrdd(data.x, data.y, triangular_kernel, compute_opt_bw_cv(data.x, data.y), false)
+    t_est[i, 3] = rddCVSingle(data.y, data.x)
     println(t_est[i,:])
 end
 
