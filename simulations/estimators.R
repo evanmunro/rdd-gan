@@ -51,6 +51,8 @@ rddBayes <- function(Y, X, c=0, discrete=TRUE) {
   return(list(ate=result[[1]], se=result[[2]], ci.lower=result[[3]], ci.upper=result[[4]], bw=1))
 }
 
+
+
 rddKRR <- function(Y, X, c=0) {
   mu1  = listdtr::krr(X[X>c], Y[X>c])
   mu0 = listdtr::krr(X[X<c], Y[X<c])
@@ -58,6 +60,8 @@ rddKRR <- function(Y, X, c=0) {
 }
 
 rddIK <- function(Y, X, c=0) {
+  #Y = Y[abs(X) < median(abs(X))]
+  #X = X[abs(X) < median(abs(X))]
   rd <- rddtools::rdd_data(x=X, y=Y, cutpoint=0)
   bw <- rddtools::rdd_bw_ik(rd)
   #print(bw)
@@ -83,19 +87,48 @@ rddLLRM <- function(Y, X, c=0) {
 #re seems to work best 
 gamfit <- function(y, x, xpred) { 
   #model <- gam(y ~ s(x, k=30, bs="re"), data = data.frame(y=y, x=x), method="ML")
-  model <- gam(y ~ s(x, k=20), data = data.frame(y=y, x=x), method="REML")
+  weights = (max(abs(x)) - abs(x))/max(abs(x))^2
+  
+  #model <- gam(y ~ s(x,k=20, bs="ts"), data = data.frame(y=y, x=x),weights=weights, method="REML")
+  model <- gam(y ~ s(x, k=30, bs="ts"), data = data.frame(y=y, x=x),weights=weights, select=TRUE, method="P-REML")
   #print(gam.check(model))
   return(predict(model, newdata=data.frame(x=xpred)))
 }
 
 boostfit <- function(y, x, xpred){
-  gam2 <- gamboost(y ~ bols(x) + bbs(x), data  = data.frame(y=y, x=x), 
-                   ctrl <- boost_control(mstop = 200))
-  cvm <- cvrisk(gam2)
-  model <- gam2[ mstop(cvm) ]
+  gam2 <- gamboost(y ~ bbs(x), data  = data.frame(y=y, x=x), 
+                   ctrl <- boost_control(mstop = 2))
+  #cvm <- cvrisk(gam2)
+  #model <- gam2[ mstop(cvm) ]
+  model = gam2
   return(predict(model, newdata=data.frame(x=xpred)))
 }
 
+#alpha=0.8
+polyfit <- function(y, x, xpred) { 
+  xAll = append(x, xpred)
+  X = model.matrix(~poly(xAll, 5, raw=TRUE)-1)
+  xpred = tail(X, 1)
+  x = head(X, -1)
+  cvfit <- glmnet::cv.glmnet(x, y, alpha=0.8)
+  return(predict(cvfit, newx = xpred, s = "lambda.min"))
+}
+
+npr_fit <- function(y, x, xfit) {
+  bw = thumbBw(x, y, 1, EpaK, weig = rep(1, length(y)))
+  print(bw)
+  model = locpol(y~x,bw=2*bw, xeval = c(0), data=data.frame(y=y,x=x))
+  #model = npreg(tydat=y, txdat=data.frame(x=x), exdat = data.frame(x=xfit), regtype="ll", bwmethod="cv.aic", gradients=TRUE)
+ # print(model$bw)
+  return(model$lpFit$y) 
+}
+rddNPR <- function (Y, X, c=0) {
+  Y = Y[abs(X) < median(abs(X))]
+  X = X[abs(X) < median(abs(X))]
+  mu1 = npr_fit(Y[X>0], X[X>0], c(0))
+  mu0 = npr_fit(Y[X<0], X[X<0], c(0))
+  return(list(ate=mu1-mu0, se=0, ci.lower = 0, ci.upper = 0, bw =0 ))
+}
 rddBOOST <- function(Y, X, c=0){
   Y = Y[abs(X) < median(abs(X))]
   X = X[abs(X) < median(abs(X))]
@@ -104,9 +137,32 @@ rddBOOST <- function(Y, X, c=0){
   return(list(ate=mu1-mu0, se=0, ci.lower = 0, ci.upper = 0, bw =0 ))
 }
 
-rddGAM <- function(Y, X, c=0) {
+rffit <- function(y, x, xpred) {
+  model <- ranger::ranger(y~x, data=data.frame(y=y, x=x))
+  return(predict(model, data.frame(x=xpred))$predictions)
+}
+
+#
+rddRF <- function(Y, X, c=0) {
   Y = Y[abs(X) < median(abs(X))]
   X = X[abs(X) < median(abs(X))]
+  mu1 = rffit(Y[X>0], X[X>0], c(0))
+  mu0 = rffit(Y[X<0], X[X<0], c(0))
+  return(list(ate=mu1-mu0, se=0, ci.lower = 0, ci.upper = 0, bw =0 ))
+}
+
+#does not work particularly well (larger sd ) about 0.0096 RMSE
+rddPoly <- function(Y, X, c=0) {
+  Y = Y[abs(X) < median(abs(X))]
+  X = X[abs(X) < median(abs(X))]
+  mu1 = polyfit(Y[X>0], X[X>0], c(0))
+  mu0 = polyfit(Y[X<0], X[X<0], c(0))
+  return(list(ate=mu1-mu0, se=0, ci.lower = 0, ci.upper = 0, bw =0 ))
+}
+
+rddGAM <- function(Y, X, c=0) {
+  #Y = Y[abs(X) < median(abs(X))]
+  #X = X[abs(X) < median(abs(X))]
   mu1 = gamfit(Y[X>0], X[X>0], c(0))
   mu0 = gamfit(Y[X<0], X[X<0], c(0))
   return(list(ate=mu1-mu0, se=0, ci.lower = 0, ci.upper = 0, bw =0 ))

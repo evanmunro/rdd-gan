@@ -11,4 +11,8 @@ data/generated/*
 *.RData
 output/*
 tables/*
+*.aux
+*.out
+*.log 
+*.gz 
 
