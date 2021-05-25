@@ -1,0 +1,26 @@
+\ifx\undefined\bysame
+\newcommand{\bysame}{\leavevmode\hbox to\leftmargin{\hrulefill\,\,}}
+\fi
+\begin{thebibliography}{xx}
+
+\harvarditem[Imbens and Lemieux]{Imbens and
+  Lemieux}{2008}{imbens2008regression}
+{\bf Imbens, Guido~W and Thomas Lemieux}, ``Regression discontinuity designs: A
+  guide to practice,'' {\it Journal of econometrics}, 2008, {\it 142} (2),
+  615--635.
+
+\harvarditem[Jacob and Lefgren]{Jacob and Lefgren}{2004}{jacob2004remedial}
+{\bf Jacob, Brian~A and Lars Lefgren}, ``Remedial education and student
+  achievement: A regression-discontinuity analysis,'' {\it Review of economics
+  and statistics}, 2004, {\it 86} (1), 226--244.
+
+\harvarditem[Lee and Lemieux]{Lee and Lemieux}{2010}{lee2010regression}
+{\bf Lee, David~S and Thomas Lemieux}, ``Regression discontinuity designs in
+  economics,'' {\it Journal of economic literature}, 2010, {\it 48} (2),
+  281--355.
+
+\harvarditem[Matsudaira]{Matsudaira}{2008}{matsudaira2008mandatory}
+{\bf Matsudaira, Jordan~D}, ``Mandatory summer school and student
+  achievement,'' {\it Journal of Econometrics}, 2008, {\it 142} (2), 829--850.
+
+\end{thebibliography}

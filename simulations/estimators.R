@@ -3,7 +3,7 @@
 
 #julia_eval("include(\"../BayesRDD/src/code/estimators/bayesrdd.jl\")")
 #julia_eval("include(\"../BayesRDD/src/code/estimators/gpsimple.jl\")")
-
+library(mgcv)
 global_M <- function(df) {
   model <- stats::lm(df$y ~ 0 + outer(df$x, 0:4, "^"))
   r1 <- unname(model$coefficients)
@@ -181,13 +181,14 @@ rddLLRC <- function(Y, X, c=0) {
 
 rddIW <- function(Y, X, M, c=0) {
   #start_time = Sys.time()
-  W = as.numeric(X>c)
-  model <-  optrdd::optrdd(X,Y,W,
+  W = as.integer(X>c)
+  print(head(W))
+  model <-  optrdd::optrdd(as.numeric(X),as.numeric(Y),W,
               max.second.derivative=M,verbose=F,estimation.point=c,
-              try.elnet.for.sigma.sq=T,optimizer='mosek')
+              try.elnet.for.sigma.sq=F)#, optimizer='mosek')
   ate <- model$tau.hat
   se <- model$sampling.se
-  ci <- model$tau.hat +c(-1,1)*model$tau.plusminus
+  ci <- model$tau.hat + c(-1,1)*model$tau.plusminus
   #end_time = Sys.time()
   #print("IW")
   #print(end_time - start_time)
@@ -246,7 +247,6 @@ rddQD<- function(Y, X, c=0) {
 }
 
 estimate_sample <- function(estimators, dfa, dfb, na, nb, gt) {
-  print("1")
   dfa <- dfa[sample(1:nrow(dfa), na), ]
   dfb <- dfb[sample(1:nrow(dfb), nb), ]
   df <- data.frame(rbind(dfa, dfb))

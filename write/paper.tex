@@ -7,6 +7,7 @@
 \usepackage{natbib} 
 \usepackage{enumerate} 
 \usepackage{comment} 
+\usepackage{algorithmic} 
 \usepackage{hyperref} 
 \hypersetup{colorlinks,citecolor=blue,urlcolor=blue,linkcolor=blue}
 \theoremstyle{definition}
@@ -25,7 +26,7 @@
 
 \begin{document}
 
-\title{A Systematic Comparison of Regression Discontinuity Design Estimators using WGANs  \thanks{
+\title{Comparing Regression Discontinuity Design Estimators using WGANs  \thanks{
 We thank Brad Ross for helpful comments and discussions. Code for the simulations in this paper is available at \texttt{https://github.com/evanmunro/rdd-gan}.}}
 
 \author{ Guido Imbens
@@ -52,15 +53,83 @@ TBD
 
 \section{Simulation Design}
 
-\subsection{Simulated Data} 
+\subsection{Sharp Regression Discontinuity Design} 
 
-\section{RDD Estimators}  
+Following \citet{imbens2008regression}, we introduce RD design in the context of the Rubin Causal Model. A researcher is interested in the causal effect of a binary intervention. $Y_i(0)$ and $Y_i(1)$ are potential outcomes for unit $i$. 
+
+We observe
+\[ Y_i = (1-W_i) Y_i(0) + W_i Y_i(1)\] 
+
+where $W_i \in \{0, 1\}$ is the observed treatment. We also observe scalar covariate $X_i$. In RD design, the assignment to the treatment is determined by the value of $X_i$ being on one side of a fixed threshold. 
+\[ W_i = \mathbbm 1 (X_i > c )\] 
+The goal in sharp RDD estimation is to estimate 
+\[ \tau = \mathbb E[ Y_i(1) - Y_i(0) | X_i = c] \] 
+
+We design a simulation based on Wasserstein GANs to compare the performance of 9 different RDD estimators. 
+
+\subsection{RDD Estimators} 
+
+
+
+\begin{enumerate} 
+\item 
+\end{enumerate} 
+
+\subsection{Simulating RDD Datasets Using GANs} 
+
+For Sharp RDD, datasets are of the form $(\bm W, \bm Y, \bm X)$. $\bm W$ is an $n$-length vector of treatments, with $W_i = \bm X_i > c$ for $i \in [n]$. We can denote the empirical distribution of $\bm X_i$ as $\mathbb F^n_x$, the empirical distribution of $(Y_i, \bm X_i )| W_i = 1$ as $\mathbb F^n_{1}$ and the empirical distribution of $(Y_i, \bm X_i) | W_i = 0$ as $\mathbb F^n_{0}$.  
+
+These datasets are used to estimate three Wasserstein GANs, which take as input random normal noise $\bm Z \sim \mathbb R^{d_g}$, where $d_g = 3$. The estimation procedure for WGANs is in Appendix \ref{sec:wgan}. 
+\begin{itemize} 
+\item $\hat g_x(z)$ is an unconditional WGAN estimated on samples from $\mathbb F^n_x$ that generates data $\tilde {\bm X}$
+\item $\hat g_1(x, z)$ is a conditional WGAN estimated on samples from $ \mathbb F^n_{1}$  that generates a sample ${\tilde Y_1}$ conditional on some $x$ with $x>c$ 
+\item $\hat g_0(x, z)$ is a conditional WGAN estimated on samples from $\mathbb F^n_{0}$  that generates ${\tilde Y_0}$ conditional on some $x$ with $x< c$ \end{itemize} 
+
+Once the GANs are trained, we can calculate the ground truth for the GAN estimated distribution by sampling random noise $Z_q \sim \mathbb R^{d_g}$ and generating outcomes at the cutoff. We average the difference in outcomes at the cutoff for the treated and untreated samples over $Q$ samples, where $Q > 10^6$ is a very large number. 
+
+\[ \tilde \tau = \frac 1Q\sum \limits_{q=1}^Q \hat g_1(c, Z_q) - \hat g_0(c, Z_q)\]  
+
+As $Q \rightarrow \infty$, then $\tilde \tau = \mathbb E[\tilde Y_i(1) - \tilde Y_i(0) | \tilde X_i = c]$ where potential outcomes are defined by the estimated GANs $\hat g_1(x, z)$ and $\hat g_0(x, z)$.   
+
+
+Then for $s \in [S]$, where $S = 10,000$ we run each estimation procedure on a finite sample of simulated data of size $[n]$ equal to that of the original dataset. For each replication of the simulation, we first simulate a WGAN dataset $(\tilde {\bm W^s}, \tilde {\bm Y^s}, \tilde {\bm X^s})$ of size $n$.  $\hat g_x(z)$ is used to generate covariates $\tilde X^s$. Treatments are $\tilde {\bm W^s} = \bm{\tilde X^s} > c$ . Then use $\hat g_1(x, z)$ for elements of $\tilde X^s$ that are above the cutoff and $\hat g_0(x, z)$ for elements of $\tilde X^s$ that are below the cutoff to generate corresponding outcomes $\bm {\tilde Y^s}$. Then for each estimator $k$ of the $K$ estimators, calculate point estimate $\hat \tau^k_s $ and 95\% confidence intervals $( b^k_s, a^k_s)$ on the data sample $(\tilde {\bm W^s}, \tilde {\bm Y^s}, \tilde {\bm X^s})$.  
+
+We can then calculate a variety of useful metrics for each estimator over the $S$ simulations. 
+\[ \mbox{MSE} = \frac 1S \sum \limits_{s=1}^S (\hat \tau^k_s - \tilde \tau)^2 \] 
+
+\[ \mbox{Bias} =  \frac 1S \sum \limits_{s=1}^S (\hat \tau^k_s - \tilde \tau) \] 
+
+\[ \mbox{Variance} = Var(\hat \tau^k_s) \] 
+
+\[ \mbox{Coverage} = \frac 1S \sum \limits_{s=1}^S \mathbbm 1 ( b^k_s < \tilde \tau < a^k_s) \] 
+
+We use each dataset to generate simulated datasets $(\tilde W_i, \bm \tilde X_i, \tilde Y_i)$ for $i \in [n]$ and a ground truth $\tau$. 
+
+
+\subsection{Datasets}
+
+The simulation exercise used to calculate the coverage, mean-squared error, bias, and variance for each of estimator is repeated for three datasets. 
+
+\begin{enumerate} 
+\item \textbf{LEE} \citet{lee2010regression}
+\item \textbf{M-MATH} \citet{matsudaira2008mandatory}
+\item \textbf{JL-MATH} \citet{jacob2004remedial}
+\end{enumerate} 
 
 \section{Simulation Results} 
 
 \section{Conclusion} 
 
 \newpage
-\bibliography{sampleBib.bib}
+\bibliography{sample.bib}
+
+
+\appendix
+
+\section{Wasserstein GANs} 
+
+
+\label{sec:wgan} 
+
 
 \end{document} 
