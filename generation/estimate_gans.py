@@ -11,8 +11,6 @@ leeGAN.save_models()
 
 print("GROUND TRUTH: ")
 print(leeGAN.groundTruth())
-
-
 leeGAN.evaluate_results()
 leeGAN.generate_data(save=True, sample_size = 1e7)
 

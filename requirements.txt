@@ -1,0 +1,5 @@
+torch
+pandas
+numpy
+pyarrow
+git+https://github.com/gsbDBI/ds-wgan.git
