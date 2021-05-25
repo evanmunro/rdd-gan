@@ -1,5 +1,5 @@
 library(kableExtra)
-library(feather)
+library(arrow)
 args = commandArgs(TRUE)
 name =  args[1]
 
@@ -15,7 +15,7 @@ rddIK <- function(Y, X, c=0) {
 }
 
 
-estimators = c("rddIK", "rddLLRM", "rddLLRC", "rddIW", "rddAK", "rddQD", "rddBayes")
+estimators = c("rddIK", "rddLLRM", "rddLLRC", "rddIW", "rddAK", "rddQD", "rddGAM")
 
 outpath  = paste0("output/", name, "/")
 tablepath = paste0("tables/", name, "_sims", ".txt")

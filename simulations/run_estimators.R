@@ -8,7 +8,7 @@ outpath  = args[2]
 print(datapath)
 print(outpath)
 
-estimators = c("rddIK", "rddLLRM", "rddLLRC", "rddIW", "rddAK", "rddQD", "rddBayes")
+estimators = c("rddIK", "rddLLRM", "rddLLRC", "rddIW", "rddAK", "rddQD", "rddGAM")
 df <- read_feather(datapath)
 print(length(unique(df$x)))
 M <- RDHonest::NPR_MROT.fit(RDHonest::RDData(df[, c("y","x")], cutoff=0))

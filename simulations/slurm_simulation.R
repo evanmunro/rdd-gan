@@ -1,4 +1,4 @@
-library(feather)
+library(arrow)
 
 args = commandArgs(TRUE)
 name = "mats_math"
