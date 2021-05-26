@@ -54,6 +54,6 @@ for (i in 1:runs) {
   dfb <- df.gb[sample(1:nrow(df.gb), nb), ]
   df <- data.frame(rbind(dfa, dfb))
   print(chunkpath)
-  write_feather(df, path=chunkpath)
+  write_feather(df, chunkpath)
   submit_slurm(name, chunkpath, runpath)
 }
