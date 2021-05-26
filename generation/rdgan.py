@@ -37,7 +37,7 @@ class GanRDD(object):
         dfa = self.y1_GAN.generate(df)
         dfb = self.y0_GAN.generate(df)
         gt = dfa['y'].mean() - dfb['y'].mean()
-        pd.DataFrame([gt], columns=["Ground Truth"]).to_csv('generation/lee_gt.csv')
+        pd.DataFrame([gt], columns=["Ground Truth"]).to_csv('generation/' + self.name + '_gt.csv')
         return gt
 
     def evaluate_results(self):
@@ -83,7 +83,7 @@ class GanWrapper(object):
                                        critic_d_hidden = [128, 128, 128],
                                        generator_d_hidden = [128, 128, 128],
                                        critic_gp_factor = 5,
-                                       max_epochs = 3,
+                                       max_epochs = 2000,
                                        generator_d_noise = 2,
                                        generator_dropout = 0.1,
                                        print_every=100)

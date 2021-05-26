@@ -3,6 +3,7 @@
 #SBATCH -p athey
 #SBATCH -c 1
 #SBATCH -G 1
+#SBATCH -t 08:00:00
 #SBATCH --mem=64G
 
 module load python/3.6.1
