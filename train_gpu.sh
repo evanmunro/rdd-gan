@@ -5,6 +5,6 @@
 #SBATCH -G 1
 #SBATCH --mem=16G
 
-module load python/3.9.0
+module load python/3.6.1
 source rddgan/bin/activate
-srun python generation/estimate_gans.py
+srun python3 generation/estimate_gans.py

@@ -11,8 +11,8 @@ data <- readMat(raw.path)
 math.data <- data.frame(y=data$zmscr02, x=pmin(data$mdcut01, data$rdcut01), t=data$ssatyn01)
 read.data <- data.frame(y=data$zrscr02, x=pmin(data$mdcut01, data$rdcut01), t=data$ssatyn01)
 
-write.csv(math.data,file="~/Documents/Github/rdd-gan/data/cleaned/m_math.csv",row.names=F)
-write.csv(read.data,file="~/Documents/Github/rdd-gan/data/cleaned/m_read.csv",row.names=F)
+write.csv(math.data,file="~/Documents/Github/rdd-gan/data/cleaned/mats_math.csv",row.names=F)
+write.csv(read.data,file="~/Documents/Github/rdd-gan/data/cleaned/mats_read.csv",row.names=F)
 #outcome is either zmscr02 or zrscr02 which is 2002 math and reading score
 #summer school attendance is ssatyn01 (that is treatment)
 
