@@ -15,7 +15,7 @@ class GanRDD(object):
         self.y0_GAN = GanWrapper(name + "_y0", dfb, outcome=['y'], context = ['x'],
                                  lbound = {'y': ybound[0]}, ubound = {'y':ybound[1]})
         self.x_GAN = GanWrapper(name + "_x", df, outcome = ['x'], context = [],
-                                 lbound = {'x': ybound[0]}, ubound = {'x':ybound[1]})
+                                 lbound = {'x': xbound[0]}, ubound = {'x':xbound[1]})
         self.data = df.copy()
 
     def train(self):
@@ -36,7 +36,9 @@ class GanRDD(object):
         df = pd.DataFrame(np.zeros((1000000, 2)), columns=['x', 'y'])
         dfa = self.y1_GAN.generate(df)
         dfb = self.y0_GAN.generate(df)
-        return dfa['y'].mean() - dfb['y'].mean()
+        gt = dfa['y'].mean() - dfb['y'].mean()
+        pd.DataFrame([gt], columns=["Ground Truth"]).to_csv('generation/lee_gt.csv')
+        return gt
 
     def evaluate_results(self):
         df_fake = self.generate_data(sample_size = self.data.shape[0])
@@ -46,7 +48,7 @@ class GanRDD(object):
         histogram = dict(variables=['x','y','x','y'],
                        nrow=2, ncol=2)
         wgan.compare_dfs(self.data, df_fake, figsize=5, histogram=histogram, scatterplot=scatterplot,
-                         save = True, path = "output")
+                         save = True, path = 'generation/'+self.name)
         return 0
 
     def generate_data(self, save = False, sample_size=1e4):
@@ -56,7 +58,7 @@ class GanRDD(object):
         dfb = s[s['x']<=0]
         dfa = self.y1_GAN.generate(dfa)
         dfb = self.y0_GAN.generate(dfb)
-        df_fake = pd.concat([dfa,dfb], axis=0, ignore_index=True)
+        df_fake = pd.concat([dfa, dfb], axis=0, ignore_index=True)
         if save:
              df_fake.drop(columns=['source']).to_feather("data/generated/{}_generated.feather".format(self.name))
         else:
@@ -81,7 +83,7 @@ class GanWrapper(object):
                                        critic_d_hidden = [128, 128, 128],
                                        generator_d_hidden = [128, 128, 128],
                                        critic_gp_factor = 5,
-                                       max_epochs = 2000,
+                                       max_epochs = 3,
                                        generator_d_noise = 2,
                                        generator_dropout = 0.1,
                                        print_every=100)

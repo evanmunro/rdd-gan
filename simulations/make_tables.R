@@ -2,6 +2,7 @@ library(kableExtra)
 library(arrow)
 args = commandArgs(TRUE)
 name =  args[1]
+gt = args[2]
 
 rddIK <- function(Y, X, c=0) {
   rd <- rddtools::rdd_data(x=X, y=Y, cutpoint=0)
@@ -34,7 +35,7 @@ print(nrow(samples)/length(estimators))
 
 df.g <- read_feather(paste0("data/generated/", name, "_generated.feather"))
 
-gt <- rddIK(df.g$y,df.g$x)$ate
+#gt <- rddIK(df.g$y,df.g$x)$ate
 print(gt)
 results <- t(sapply(estimators, FUN = function (x) {
                     df <- samples[samples$type==x, ]
