@@ -73,8 +73,8 @@ class GanWrapper(object):
 
         self.specs = wgan.Specifications(self.dwrapper,
                                        batch_size=64,
-                                       critic_steps=2,
-                                       optimizer=wgan.OAdam,
+                                       critic_steps=25,
+                                       optimizer=torch.optim.Adam,
                                        generator_optimizer=wgan.OAdam,
                                        critic_lr = 1e-4,
                                        generator_lr = 1e-4,
@@ -83,6 +83,7 @@ class GanWrapper(object):
                                        critic_gp_factor = 5,
                                        max_epochs = 2000,
                                        generator_d_noise = 2,
+                                       generator_dropout = 0.1,
                                        print_every=100)
         self.critic = wgan.Critic(self.specs)
         self.generator = wgan.Generator(self.specs)
