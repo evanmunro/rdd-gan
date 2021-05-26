@@ -84,19 +84,19 @@ rddLLRM <- function(Y, X, c=0) {
   return(list(ate=ate, se=se, ci.lower=ci.lower, ci.upper=ci.upper, bw=model$bws['h','left']))
 }
 
-#re seems to work best 
-gamfit <- function(y, x, xpred) { 
+#re seems to work best
+gamfit <- function(y, x, xpred) {
   #model <- gam(y ~ s(x, k=30, bs="re"), data = data.frame(y=y, x=x), method="ML")
   weights = (max(abs(x)) - abs(x))/max(abs(x))^2
-  
+
   #model <- gam(y ~ s(x,k=20, bs="ts"), data = data.frame(y=y, x=x),weights=weights, method="REML")
   model <- gam(y ~ s(x, k=30, bs="ts"), data = data.frame(y=y, x=x),weights=weights, select=TRUE, method="P-REML")
   #print(gam.check(model))
-  return(predict(model, newdata=data.frame(x=xpred)))
+  return(predict(model, newdata=data.frame(x=xpred), se.fit=TRUE))
 }
 
 boostfit <- function(y, x, xpred){
-  gam2 <- gamboost(y ~ bbs(x), data  = data.frame(y=y, x=x), 
+  gam2 <- gamboost(y ~ bbs(x), data  = data.frame(y=y, x=x),
                    ctrl <- boost_control(mstop = 2))
   #cvm <- cvrisk(gam2)
   #model <- gam2[ mstop(cvm) ]
@@ -105,7 +105,7 @@ boostfit <- function(y, x, xpred){
 }
 
 #alpha=0.8
-polyfit <- function(y, x, xpred) { 
+polyfit <- function(y, x, xpred) {
   xAll = append(x, xpred)
   X = model.matrix(~poly(xAll, 5, raw=TRUE)-1)
   xpred = tail(X, 1)
@@ -120,7 +120,7 @@ npr_fit <- function(y, x, xfit) {
   model = locpol(y~x,bw=2*bw, xeval = c(0), data=data.frame(y=y,x=x))
   #model = npreg(tydat=y, txdat=data.frame(x=x), exdat = data.frame(x=xfit), regtype="ll", bwmethod="cv.aic", gradients=TRUE)
  # print(model$bw)
-  return(model$lpFit$y) 
+  return(model$lpFit$y)
 }
 rddNPR <- function (Y, X, c=0) {
   Y = Y[abs(X) < median(abs(X))]
@@ -165,7 +165,9 @@ rddGAM <- function(Y, X, c=0) {
   #X = X[abs(X) < median(abs(X))]
   mu1 = gamfit(Y[X>0], X[X>0], c(0))
   mu0 = gamfit(Y[X<0], X[X<0], c(0))
-  return(list(ate=mu1-mu0, se=0, ci.lower = 0, ci.upper = 0, bw =0 ))
+  se = sqrt(mu1$se.fit^2 + mu0$se.fit^2)
+  tau = mu1$fit - mu0$fit
+  return(list(ate=tau, se=se, ci.lower = tau-se*1.96, ci.upper = tau+se*1.96, bw =0 ))
 }
 #coverage optimal local linear regression
 rddLLRC <- function(Y, X, c=0) {
