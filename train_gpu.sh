@@ -3,7 +3,7 @@
 #SBATCH -p athey
 #SBATCH -c 1
 #SBATCH -G 1
-#SBATCH --mem=16G
+#SBATCH --mem=64G
 
 module load python/3.6.1
 module load cuda/11.2.0
