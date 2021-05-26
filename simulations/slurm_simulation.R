@@ -1,7 +1,7 @@
 library(arrow)
 
 args = commandArgs(TRUE)
-name = "mats_math"
+name = "lee"
 fraction = 1
 runs = 2
 
