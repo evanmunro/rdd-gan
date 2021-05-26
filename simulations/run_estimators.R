@@ -1,4 +1,4 @@
-library(feather)
+library(arrow)
 source("estimators.R")
 
 args = commandArgs(TRUE)
