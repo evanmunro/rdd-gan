@@ -1,5 +1,5 @@
 library(arrow)
-source("estimators.R")
+source("simulations/estimators.R")
 
 args = commandArgs(TRUE)
 datapath = args[1]
