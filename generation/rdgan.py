@@ -10,9 +10,9 @@ class GanRDD(object):
         dfa = df[df['x']>0].copy()
         dfb = df[df['x']<=0].copy()
         self.name = name
-        self.y1_GAN = GanWrapper(name + "_y1", epochs=epochs, dfa, outcome=['y'], context = ['x'],
+        self.y1_GAN = GanWrapper(name + "_y1", dfa, epochs=epochs, outcome=['y'], context = ['x'],
                                  lbound = {'y': ybound[0]}, ubound = {'y':ybound[1]})
-        self.y0_GAN = GanWrapper(name + "_y0", epochs=epochs, dfb, outcome=['y'], context = ['x'],
+        self.y0_GAN = GanWrapper(name + "_y0", dfb, epochs=epochs, outcome=['y'], context = ['x'],
                                  lbound = {'y': ybound[0]}, ubound = {'y':ybound[1]})
         self.x_GAN = GanWrapper(name + "_x", df, epochs=epochs, outcome = ['x'], context = [],
                                  lbound = {'x': xbound[0]}, ubound = {'x':xbound[1]})
