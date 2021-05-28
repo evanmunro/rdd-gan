@@ -5,7 +5,7 @@ import pandas as pd
 mats_data = pd.read_csv("data/cleaned/mats_math.csv")
 matsGAN = GanRDD("mats_math", mats_data, xbound = [mats_data.x.min(), mats_data.x.max()],
                                    ybound = [mats_data.y.min(), mats_data.y.max()],
-                                   epochs=200)
+                                   epochs=750)
 #matsGAN.load()
 matsGAN.train()
 matsGAN.save_models()
