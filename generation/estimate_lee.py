@@ -3,11 +3,10 @@ import pandas as pd
 
 
 lee_data = pd.read_csv("data/cleaned/lee.csv")
-leeGAN = GanRDD("lee", lee_data, xbound = [-1, 1], ybound = [0, 1], epochs=2000)
-leeGAN.load()
+leeGAN = GanRDD("lee", lee_data, xbound = [-1, 1], ybound = [0, 1], epochs=1000)
+#leeGAN.load()
 leeGAN.train()
 leeGAN.save_models()
-#leeGAN.load()
 
 print("GROUND TRUTH: ")
 print(leeGAN.groundTruth())

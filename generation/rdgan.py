@@ -67,14 +67,15 @@ class GanRDD(object):
 class GanWrapper(object):
     def __init__(self, name, df, epochs, outcome, context, lbound, ubound):
         self.name = name
-        self.dwrapper = wgan.DataWrapper(df, outcome, continuous_lower_bounds=lbound,
+        self.dwrapper = wgan.DataWrapper(df, outcome, context_vars = context,
+                                                continuous_lower_bounds=lbound,
                                               continuous_upper_bounds=ubound)
         outcome_scaled, context_scaled = self.dwrapper.preprocess(df)
         self.outcome = outcome_scaled
         self.context = context_scaled
 
         self.specs = wgan.Specifications(self.dwrapper,
-                                       batch_size=3000,
+                                       batch_size=256,
                                        critic_steps=25,
                                        optimizer=torch.optim.Adam,
                                        generator_optimizer=wgan.OAdam,

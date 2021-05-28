@@ -52,12 +52,19 @@ function estimate_σ2(x, y)
 	return σ2
 end
 
+function test_worst_case(x, y)
+	x = RunningVariable(x; cutoff= 0.0)
+	data = RDData(y, x)
+	model = fit(ImbensWagerOptRD(B=14.28, solver=Mosek.Optimizer), data.ZsR, data.Ys)
+	println(worst_case_mu(x, y, model.weights).max_abs_bias)
+
+end
 function worst_case_mu(x, y, γ, γ0 = 0.0)
     model =  Model(Mosek.Optimizer)
 	println(typeof(y))
 	println(typeof(x))
     data  = DiscretizedRDData(y, x, 2000)
-    M = estimate_M(x,y)
+    M = 14.28#estimate_M(x,y)
 	#M=1200
     X = data.xx; d=length(X); h = data.h; n= data.weights; ixc = data.ixc
     @variable(model, mu0[1:d])
@@ -67,8 +74,8 @@ function worst_case_mu(x, y, γ, γ0 = 0.0)
     add_constraint!(model, mu0, h, M)
     add_constraint!(model, mu1, h, M)
     ## add these constraints for model to have a solution
-    @constraint(model, mu0[ixc] == 0 )
-    @constraint(model, mu1[ixc] == 0 )
+    #@constraint(model, mu0[ixc] == 0 )
+    #@constraint(model, mu1[ixc] == 0 )
     @constraint(model, (mu0[ixc+1] - mu0[ixc])/h[ixc] == 0)
     @constraint(model, (mu1[ixc+1] - mu1[ixc])/h[ixc] == 0)
 
