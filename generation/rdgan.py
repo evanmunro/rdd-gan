@@ -75,7 +75,8 @@ class GanWrapper(object):
         self.context = context_scaled
 
         self.specs = wgan.Specifications(self.dwrapper,
-                                       batch_size=256,
+        #batch 256
+                                       batch_size=2048,
                                        critic_steps=25,
                                        optimizer=torch.optim.Adam,
                                        generator_optimizer=wgan.OAdam,

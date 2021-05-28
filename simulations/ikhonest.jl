@@ -56,7 +56,29 @@ function test_worst_case(x, y)
 	x = RunningVariable(x; cutoff= 0.0)
 	data = RDData(y, x)
 	model = fit(ImbensWagerOptRD(B=14.28, solver=Mosek.Optimizer), data.ZsR, data.Ys)
-	println(worst_case_mu(x, y, model.weights).max_abs_bias)
+	println("tau_est", model.tau_est)
+	println("se: ", model.se_est)
+	println("bias: ", worst_case_mu(x, y, model.weights).max_abs_bias)
+
+end
+
+function worst_bias_symmetric(x, y, γ)
+	model =  Model(Mosek.Optimizer)
+	println("sum gamma: ", sum(γ))
+	data  = DiscretizedRDData(y, x, 2000)
+	M = 14.28#estimate_M(x,y)
+	X = data.xx; d=length(X); h = data.h; n= data.weights; ixc = data.ixc
+	j = data.xmap
+	@variable(model, mu[1:d])
+	add_constraint!(model, mu, h, M)
+
+	@constraint(model, mu[ixc] == 0 )
+    @constraint(model, (mu[ixc+1] - mu[ixc])/h[ixc] == 0)
+	@objective(model, Max, (sum(γ[i]*mu[j[i]] for i in 1:sum(n))))
+
+	optimize!(model)
+    max_bias = objective_value(model)
+	return max_bias
 
 end
 function worst_case_mu(x, y, γ, γ0 = 0.0)
@@ -74,10 +96,10 @@ function worst_case_mu(x, y, γ, γ0 = 0.0)
     add_constraint!(model, mu0, h, M)
     add_constraint!(model, mu1, h, M)
     ## add these constraints for model to have a solution
-    #@constraint(model, mu0[ixc] == 0 )
-    #@constraint(model, mu1[ixc] == 0 )
-    @constraint(model, (mu0[ixc+1] - mu0[ixc])/h[ixc] == 0)
-    @constraint(model, (mu1[ixc+1] - mu1[ixc])/h[ixc] == 0)
+    @constraint(model, mu0[ixc] == 0 )
+    @constraint(model, mu1[ixc] == 0 )
+    #@constraint(model, (mu0[ixc+1] - mu0[ixc])/h[ixc] == 0)
+    #@constraint(model, (mu1[ixc+1] - mu1[ixc])/h[ixc] == 0)
 
     # maximize the absolute bias
     @objective(model, Max, (sum(γ[i]*mu1[j[i]]*W[j[i]] for i in 1:sum(n)) +
