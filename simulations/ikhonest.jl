@@ -13,18 +13,36 @@ struct DiscretizedRDData
 	σ²::Float64
 end
 
-function estimate_M(x, y)
-	model = lm(@formula(y ~ x + x^2 + x^3 + x^4), DataFrame(y=y, x=x))
-	beta = coef(model)
-    f2(x) = 2*beta[3] .+ 6*beta[4].*x .+ 12*beta[5]*x.^2
-    f2_est = abs.(f2(x))
-    return maximum(f2_est)
+function estimate_M(data::DiscretizedRDData)
+	w = data.x .> 0
+	y1 = data.y[w.==1]; x1 = data.x[w.==1]; y0 = data.y[w.==0]; x0 = data.x[w.==0]
+	boundsa = fit_bounds(x1, y1)
+	boundsb = fit_bounds(x0, y0)
+	return (M1 = max(boundsa.M1, boundsb.M1), M2=max(boundsa.M2, boundsb.M2))
 end
 
-function add_constraint!(model, f, h, M2)
+function fit_bounds(x, y)
+	xcut = quantile(abs.(x), 0.8)
+	println("xcut::", xcut)
+	y = y[abs.(x) .< xcut]; x = x[abs.(x) .< xcut]
+	model = lm(@formula(y ~ x + x^2 + x^3 + x^4), DataFrame(y=y, x=x))
+	beta = coef(model)
+	f1(x) = beta[2] .+ 2*beta[3].*x + 3*beta[4].*x.^2 + 4*beta[5].*x.^3
+    f2(x) = 2*beta[3] .+ 6*beta[4].*x .+ 12*beta[5]*x.^2
+    f2_est = abs.(f2(x))
+	f1_est = abs.(f1(x))
+	println("f1: ", maximum(f1_est))
+	println("f2: ", maximum(f2_est))
+    return (M1 = maximum(f1_est), M2 = maximum(f2_est))
+end
+
+function add_constraint!(model, f, h, M1, M2)
     d  = length(h) + 1
     for i in 3:d
-        @constraint(model, M2 <= (f[i] - 2*f[i-1] + f[i-2])/(h[i-1]*h[i-2])<= M2)
+        @constraint(model, -M2 <= (f[i] - 2*f[i-1] + f[i-2])/(h[i-1]*h[i-2])<= M2)
+    end
+	for i in 2:d
+         @constraint(model, 0 <= (f[i] - f[i-1])/h[i-1] <= M1)
     end
 end
 
@@ -54,28 +72,29 @@ end
 
 function test_worst_case(x, y)
 	x = RunningVariable(x; cutoff= 0.0)
-	data = RDData(y, x)
-	model = fit(ImbensWagerOptRD(B=14.28, solver=Mosek.Optimizer), data.ZsR, data.Ys)
+	rd = RDData(y, x)
+	model = fit(ImbensWagerOptRD(B=14.28, solver=Mosek.Optimizer), rd.ZsR, rd.Ys)
 	println("tau_est", model.tau_est)
 	println("se: ", model.se_est)
 	println("bias: ", worst_case_mu(x, y, model.weights).max_abs_bias)
-
 end
 
 function worst_bias_symmetric(x, y, γ)
 	model =  Model(Mosek.Optimizer)
 	println("sum gamma: ", sum(γ))
+
 	data  = DiscretizedRDData(y, x, 2000)
-	M = 14.28#estimate_M(x,y)
+	bounds = estimate_M(x,y)
+	M1 = bounds.M1
+	M2 = bounds.M2 #estimate_M(x,y)
+	println(M1)
 	X = data.xx; d=length(X); h = data.h; n= data.weights; ixc = data.ixc
 	j = data.xmap
 	@variable(model, mu[1:d])
-	add_constraint!(model, mu, h, M)
-
+	add_constraint!(model, mu, h, M1, M2)
 	@constraint(model, mu[ixc] == 0 )
     @constraint(model, (mu[ixc+1] - mu[ixc])/h[ixc] == 0)
 	@objective(model, Max, (sum(γ[i]*mu[j[i]] for i in 1:sum(n))))
-
 	optimize!(model)
     max_bias = objective_value(model)
 	return max_bias
@@ -83,23 +102,26 @@ function worst_bias_symmetric(x, y, γ)
 end
 function worst_case_mu(x, y, γ, γ0 = 0.0)
     model =  Model(Mosek.Optimizer)
-	println(typeof(y))
-	println(typeof(x))
     data  = DiscretizedRDData(y, x, 2000)
-    M = 14.28#estimate_M(x,y)
+	println("sigma: ", data.σ²)
+	bounds = estimate_M(data)
+	M1 = bounds.M1
+	M2 = bounds.M2
+	println("M1 bound", M1)
+	println("M2 Bound", M2)
+    #M2 = 14.28#estimate_M(x,y)
 	#M=1200
     X = data.xx; d=length(X); h = data.h; n= data.weights; ixc = data.ixc
     @variable(model, mu0[1:d])
     @variable(model, mu1[1:d])
     c = 0.0; W = X .> c; j = data.xmap
+	#@constraint(model, mu0[ixc]==0)
+	#@constraint(model, mu1[ixc]==0)
+	#@constraint(model, (mu0[ixc+1] - mu0[ixc])/h[ixc] == 0)
+   	#@constraint(model, (mu1[ixc+1] - mu1[ixc])/h[ixc] == 0)
 
-    add_constraint!(model, mu0, h, M)
-    add_constraint!(model, mu1, h, M)
-    ## add these constraints for model to have a solution
-    @constraint(model, mu0[ixc] == 0 )
-    @constraint(model, mu1[ixc] == 0 )
-    #@constraint(model, (mu0[ixc+1] - mu0[ixc])/h[ixc] == 0)
-    #@constraint(model, (mu1[ixc+1] - mu1[ixc])/h[ixc] == 0)
+	add_constraint!(model, mu0, h, M1, M2)
+	add_constraint!(model, mu1, h, M1, M2)
 
     # maximize the absolute bias
     @objective(model, Max, (sum(γ[i]*mu1[j[i]]*W[j[i]] for i in 1:sum(n)) +
