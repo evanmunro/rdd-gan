@@ -6,15 +6,15 @@ import numpy as np
 
 class GanRDD(object):
 
-    def __init__(self, name, df, xbound, ybound):
+    def __init__(self, name, df, xbound, ybound, epochs):
         dfa = df[df['x']>0].copy()
         dfb = df[df['x']<=0].copy()
         self.name = name
-        self.y1_GAN = GanWrapper(name + "_y1", dfa, outcome=['y'], context = ['x'],
+        self.y1_GAN = GanWrapper(name + "_y1", epochs=epochs, dfa, outcome=['y'], context = ['x'],
                                  lbound = {'y': ybound[0]}, ubound = {'y':ybound[1]})
-        self.y0_GAN = GanWrapper(name + "_y0", dfb, outcome=['y'], context = ['x'],
+        self.y0_GAN = GanWrapper(name + "_y0", epochs=epochs, dfb, outcome=['y'], context = ['x'],
                                  lbound = {'y': ybound[0]}, ubound = {'y':ybound[1]})
-        self.x_GAN = GanWrapper(name + "_x", df, outcome = ['x'], context = [],
+        self.x_GAN = GanWrapper(name + "_x", df, epochs=epochs, outcome = ['x'], context = [],
                                  lbound = {'x': xbound[0]}, ubound = {'x':xbound[1]})
         self.data = df.copy()
 
@@ -65,7 +65,7 @@ class GanRDD(object):
             return df_fake
 
 class GanWrapper(object):
-    def __init__(self, name, df, outcome, context, lbound, ubound):
+    def __init__(self, name, df, epochs, outcome, context, lbound, ubound):
         self.name = name
         self.dwrapper = wgan.DataWrapper(df, outcome, continuous_lower_bounds=lbound,
                                               continuous_upper_bounds=ubound)
@@ -83,7 +83,7 @@ class GanWrapper(object):
                                        critic_d_hidden = [128, 128, 128],
                                        generator_d_hidden = [128, 128, 128],
                                        critic_gp_factor = 5,
-                                       max_epochs = 2000,
+                                       max_epochs = epochs,
                                        generator_d_noise = 2,
                                        generator_dropout = 0.1,
                                        print_every=100)

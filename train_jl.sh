@@ -11,6 +11,4 @@ module load cuda/11.2.0
 module load py-pytorch/1.4.0_py36
 module load py-numpy/1.19.2_py36
 module load py-pandas/1.0.3_py36
-python3 generation/estimate_lee.py
 python3 generation/estimate_jl.py
-python3 generation/estimate_mats.py
