@@ -1,6 +1,6 @@
 
 library(JuliaCall)
-julia_eval("include(simulations/ikhonest.jl)")
+julia_eval("include(\"simulations/ikhonest.jl\")")
 
 #julia_eval("include(\"../BayesRDD/src/code/estimators/bayesrdd.jl\")")
 #julia_eval("include(\"../BayesRDD/src/code/estimators/gpsimple.jl\")")
@@ -37,7 +37,8 @@ rddKRRFast <- function(Y, X, c=0) {
 }
 
 rddIKHonest <- function(Y, X, c=0) { 
-  result <- julia_eval("IKHonest")(Y, X)
+  result <- julia_eval("IKHonest")(as.numeric(Y), as.numeric(X))
+  print(result)
   return(list(ate = result[[1]], se = result[[2]], ci.lower = result[[3]], ci.upper = result[[4]], bw=0))
 }
 rddBayes <- function(Y, X, c=0, discrete=TRUE) {

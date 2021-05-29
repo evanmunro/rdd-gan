@@ -1,5 +1,8 @@
 using JuMP, GLM, RegressionDiscontinuity, MosekTools, LinearAlgebra
 using Roots: fzero
+using Loess: loess, predict
+using FiniteDifferences
+using DataFrames, Suppressor
 
 struct DiscretizedRDData
 	y::Array{Float64, 1}
@@ -13,16 +16,38 @@ struct DiscretizedRDData
 	σ²::Float64
 end
 
+function smooth_mean(x ,y)
+	model = loess(x, y)
+	return f(a) = predict(model, a)
+end
+
+function fit_bounds_l(x, y)
+
+	xcut = quantile(abs.(x), 0.8)
+	println("xcut::", xcut)
+	y = y[abs.(x) .< xcut]; x = x[abs.(x) .< xcut]
+
+	μ = smooth_mean(x,y)
+	us = range(extrema(x)...; step = 0.1)
+	f1 = zeros(length(us))
+	f2 = zeros(length(us))
+	for i in 2:(length(us) -1)
+		f1[i] = central_fdm(5, 1)(μ, us[i])
+		f2[i] = central_fdm(5, 2)(μ, us[i])
+	end
+	return (M1 = maximum(f1), M2 = maximum(f2))
+end
+
 function estimate_M(data::DiscretizedRDData)
 	w = data.x .> 0
 	y1 = data.y[w.==1]; x1 = data.x[w.==1]; y0 = data.y[w.==0]; x0 = data.x[w.==0]
-	boundsa = fit_bounds(x1, y1)
-	boundsb = fit_bounds(x0, y0)
+	boundsa = fit_bounds_l(x1, y1)
+	boundsb = fit_bounds_l(x0, y0)
 	return (M1 = max(boundsa.M1, boundsb.M1), M2=max(boundsa.M2, boundsb.M2))
 end
 
 function fit_bounds(x, y)
-	xcut = quantile(abs.(x), 0.8)
+	xcut = quantile(abs.(x), 1.0)
 	println("xcut::", xcut)
 	y = y[abs.(x) .< xcut]; x = x[abs.(x) .< xcut]
 	model = lm(@formula(y ~ x + x^2 + x^3 + x^4), DataFrame(y=y, x=x))
@@ -182,8 +207,11 @@ function IKHonest(y, x)
 	bw = model.fitted_bandwidth
 	se_est = model.se_est
 	weights = calculate_weights(y, x, bw)
-	max_bias = worst_case_mu(x, y, weights).max_abs_bias
-	println(max_bias)
+	max_bias = 0.0
+	@suppress_out begin
+		max_bias = worst_case_mu(x, y, weights).max_abs_bias
+	end
+	#println("bias: ", max_bias)
 	ci = bias_adjusted_gaussian_ci(se_est; maxbias = max_bias)
 	return (ate = model.tau_est,
 			se = se_est,
