@@ -19,7 +19,7 @@ submit_slurm <- function(name, chunkpath, runpath) {
    cat("#SBATCH -p owners\n")
    cat("module load gcc/10.1.0\n")
    cat("module load R/4.0.2\n")
-   cat("module load julia")
+   cat("module load julia\n")
    cat("Rscript simulations/run_estimators.R", chunkpath, runpath, sep=" ")
 
    # Close the sink!
