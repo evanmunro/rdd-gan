@@ -185,7 +185,7 @@ end
 
 function RDDIK(x, y)
 	x = RunningVariable(x; cutoff= 0.0)
-	data = RDData(y, x)
+	data = RegressionDiscontinuity.RDData(y, x)
 	model = fit(NaiveLocalLinearRD(kernel = SymTriangularDist(),
 		bandwidth = ImbensKalyanaraman()), data.ZsR, data.Ys)
 	return model
