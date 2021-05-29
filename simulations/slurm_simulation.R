@@ -14,7 +14,7 @@ submit_slurm <- function(name, chunkpath, runpath) {
    cat("#SBATCH --job-name=", dataname, ".job\n", sep="")
    cat("#SBATCH --output=.out/", dataname, ".out\n", sep="")
    cat("#SBATCH --error=.out/", dataname, ".err\n", sep="")
-   cat("#SBATCH --time=00:5:00\n")
+   cat("#SBATCH --time=00:10:00\n")
    cat("#SBATCH --mem=6GB\n")
    cat("#SBATCH -p owners\n")
    cat("module load gcc/10.1.0\n")
