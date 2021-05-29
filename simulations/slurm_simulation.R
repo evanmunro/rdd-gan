@@ -1,7 +1,7 @@
 library(arrow)
 
 args = commandArgs(TRUE)
-name = "lee"
+name = args[1]
 fraction = 1
 runs = 2
 
