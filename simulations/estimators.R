@@ -36,7 +36,7 @@ rddKRRFast <- function(Y, X, c=0) {
   return(list(ate=mean(ates), se=0, ci.lower=0, ci.upper=0, bw=0))
 }
 
-rddIKHonest <- function(Y, X, c=0) { 
+rddIKHonest <- function(Y, X, c=0) {
   result <- julia_eval("IKHonest")(as.numeric(Y), as.numeric(X))
   print(result)
   return(list(ate = result[[1]], se = result[[2]], ci.lower = result[[3]], ci.upper = result[[4]], bw=0))
@@ -79,7 +79,7 @@ rddIK <- function(Y, X, c=0) {
 }
 
 #robust MSE optimal local linear regression
-rddLLRM <- function(Y, X, c=0) {
+rddCLL <- function(Y, X, c=0) {
   sink("/dev/null")
   model <- rdrobust::rdrobust(Y, X, c=c, bwselect="mserd")
   sink()
@@ -243,7 +243,7 @@ rddNN <- function(Y, X, M) {
 
 
 #local quadratic with bias correction, MSE optimal bandwidth
-rddQD<- function(Y, X, c=0) {
+rddCLQ<- function(Y, X, c=0) {
   sink("/dev/null")
   model <- rdrobust::rdrobust(Y, X, c=c, p=2)
   sink()
