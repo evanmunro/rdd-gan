@@ -3,7 +3,7 @@ library(arrow)
 
 make_tables <- function(name, gt) {
     print(name)
-    estimators = c("rddIK", "rddLLRM", "rddLLRC", "rddIW", "rddAK", "rddQD", "rddGAM")
+    estimators = c("rddIK", "rddCLL", "rddCLQ", "rddIW", "rddAK",  "rddGAM", "rddIKHonest")
     outpath  = paste0("output/", name, "/")
     tablepath = paste0("tables/", name, "_sims", ".txt")
 
