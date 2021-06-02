@@ -9,6 +9,7 @@
 \usepackage{comment} 
 \usepackage{algorithmic} 
 \usepackage{hyperref} 
+\usepackage{booktabs}
 \hypersetup{colorlinks,citecolor=blue,urlcolor=blue,linkcolor=blue}
 \theoremstyle{definition}
 \newtheorem{theorem}{Theorem}[section]
@@ -69,10 +70,16 @@ We design a simulation based on Wasserstein GANs to compare the performance of 9
 
 \subsection{RDD Estimators} 
 
-
+We evaluate the performance of the following seven estimators. 
 
 \begin{enumerate} 
-\item 
+\item  \textbf{IK}: Local linear regression with \citet{imbens2012optimal} bandwidth and the triangular kernel. 
+\item \textbf{CLL}: Local linear regression with \citet{calonico2014robust} bias correction and MSE-optimal bandwidth. 
+\item \textbf{CLQ}: Local quadratic regression with \citet{calonico2014robust} bias correction and MSE-optimal bandwidth. 
+\item \textbf{IW}: \citet{imbens2019optimized} finite sample minimax linear estimator. 
+\item \textbf{AK}: \citet{armstrong2018optimal} finite sample minimax linear estimator. 
+\item \textbf{GAM}: Data-driven method that fits a generalized additive model \citep{wood2017generalized} on either side of the cutoff. 
+\item \textbf{IKHonest}: \citet{imbens2012optimal} bandwidth selection for the point estimate of the RDD parameter and \citet{imbens2019optimized} for confidence interval construction around that point estimate. 
 \end{enumerate} 
 
 \subsection{Simulating RDD Datasets Using GANs} 
@@ -103,20 +110,114 @@ We can then calculate a variety of useful metrics for each estimator over the $S
 
 \[ \mbox{Coverage} = \frac 1S \sum \limits_{s=1}^S \mathbbm 1 ( b^k_s < \tilde \tau < a^k_s) \] 
 
-We use each dataset to generate simulated datasets $(\tilde W_i, \bm \tilde X_i, \tilde Y_i)$ for $i \in [n]$ and a ground truth $\tau$. 
-
-
 \subsection{Datasets}
 
-The simulation exercise used to calculate the coverage, mean-squared error, bias, and variance for each of estimator is repeated for three datasets. 
+The simulation exercise used to calculate the coverage, mean-squared error, bias, and variance for each of estimator is repeated for three RDD datasets. 
 
 \begin{enumerate} 
-\item \textbf{LEE} \citet{lee2010regression}
-\item \textbf{M-MATH} \citet{matsudaira2008mandatory}
-\item \textbf{JL-MATH} \citet{jacob2004remedial}
+\item \textbf{LEE}: \citet{lee2010regression} uses data from pairs of U.S. congressional elections from 1946 to 1998. The running variable is the net vote threshold for the candidate's party in the previous congressional election. The cutoff is 0. The outcome is the net vote share for the candidate in the following election. The treatment effect is the effect of incumbency on electoral success, comparing elections for which the candidate's party narrowly won or narrowly lost in the previous year. There are 6,558 observations in the dataset. 
+\item \textbf{JL-MATH}: The dataset is a record of third-grade student achievement in Chicago Public Schools from 1997 to 1999, from \citet{jacob2004remedial}. The running variable is the minimum of the math and reading score for an exam taken in the spring and the outcome is the math score for an exam taken after summer school. The cutoff is the passing threshold. There are 70,831 observations in the dataset.  The treatment effect is the average effect of summer school on math attainment, comparing students on either side of the threshold for mandatory summer school. There are 70,831 observations in the dataset. 
+\item \textbf{M-MATH}: The dataset is a record of fifth-grade student achievement in an unspecified large school district in the northeast from 2001 to 2002, from  \citet{matsudaira2008mandatory}. The running variable is the minimum of the math and reading baseline score and the cutoff is the passing threshold. The outcome is the post summer school exam score. If a student fails either subject, they are meant to attend summer school, although the qualification is fuzzy for this dataset. The treatment effect is the average intent-to-treat effect of summer school on math attainment, comparing students on either side of the threshold for mandatory summer school. There are 68,798 observations in the dataset. 
 \end{enumerate} 
 
+The summary statistics for the real data and for a sample of generated data of size equal to the real data is in Table \ref{tab:summary} 
+
+\begin{table} [ht] 
+\centering 
+\begin{tabular}{lll}\toprule  & Mean (s.d.) Real & Mean (s.d.) Generated\\\midruleLEE running variable & 0.13 (0.46) & 0.14 (0.45)\\LEE outcome & 0.55 (0.24) & 0.56 (0.23)\\JL-MATH running variable & 0.23 (0.98) & 0.17 (0.98)\\JL-MATH outcome & -0.44 (0.98) & -0.44 (0.95)\\M-MATH running variable & 10.32 (41.27) & 9.95 (40.11)\\\addlinespaceM-MATH outcome & 0.00 (1.00) & -0.08 (0.97)\\\bottomrule\end{tabular}
+\label{tab:summary} 
+\caption{Mean and standard deviation of real and generated data} 
+\end{table} 
+
+The estimated treatment effect for a real data and for a sample of generated data of size equal to the real data is in Table \ref{tab:tesample}. The characteristics of the generated data is very similar to that of the real data. 
+\begin{table} [ht] 
+\centering  
+\begin{tabular}{lll}\toprule  & $\hat \tau$ (s.e.) Real & $\hat \tau$ (s.e.) Generated\\\midruleLEE  & 0.07992 (0.00835) & 0.08311 (0.00618)\\ JL-MATH & -0.18381 (0.01666) & -0.19529 (0.01621)\\M-MATH  & -0.08031 (0.01135) & -0.06149 (0.01157)\\\bottomrule\end{tabular}
+\label{tab:tesample} 
+\caption{Estimated treatment effects for real and generated data. The estimate is calculated using local-linear regression with the \citet{imbens2012optimal} bandwidth.} 
+\end{table} 
+
 \section{Simulation Results} 
+
+The RMSE, bias, standard deviation, coverage and interval widths for each dataset for 1000 samples from the WGAN-generated dataset are recorded in Table \ref{tab:leemc}-\ref{tab:matsmc}. The bound on the second derivative for the IW and AK estimators is calculated in each step by estimating a global quadratic regression above and below the cutoff and evaluating the maximum second derivative of that polynomial in the range of the data. For LEE and JL-MATH, the GAM-based estimator has the lowest RMSE, and local-linear regression with the IK-bandwidth is a close second. For M-MATH the local linear regression has the lowest RMSE. The bias-corrected local linear and local quadratic estimators have a higher RMSE, and for the JL-MATH dataset, the local quadratic estimator substantially undercovers. The finite-sample minimax linear estimators, IW and AK, also have a higher For every dataset, either the bias-corrected local quadratic estimator or the AK estimator have the highest RMSE. 
+\begin{table} [ht]
+\centering 
+\begin{tabular}{lrrrrrr}
+\toprule
+  & est & rmse & bias & sd & covg & width\\
+\midrule
+rddIK & 0.0829 & 0.0069 & -0.0025 & 0.0064 & 0.9439 & 0.0257\\
+rddCLL & 0.0857 & 0.0103 & 0.0003 & 0.0103 & 0.9481 & 0.0394\\
+rddCLQ & 0.0856 & 0.0126 & 0.0002 & 0.0126 & 0.9439 & 0.0470\\
+rddIW & 0.0850 & 0.0100 & -0.0004 & 0.0100 & 0.9724 & 0.0453\\
+rddAK & 0.0853 & 0.0112 & -0.0001 & 0.0112 & 0.9707 & 0.0487\\
+\addlinespace
+rddGAM & 0.0845 & 0.0068 & -0.0009 & 0.0068 & 0.9539 & 0.0272\\
+rddIKHonest & 0.0829 & 0.0069 & -0.0025 & 0.0064 & 0.9941 & 0.0626\\
+\bottomrule
+\end{tabular}
+\caption{Simulation Results for \textbf{LEE} Generated Data} 
+\label{tab:leemc} 
+\end{table} 
+
+\begin{table} [ht]
+\centering 
+\begin{tabular}{lrrrrrr}
+\toprule
+  & est & rmse & bias & sd & covg & width\\
+\midrule
+rddIK & -0.2018 & 0.0173 & 0.0068 & 0.0159 & 0.9419 & 0.0656\\
+rddCLL & -0.2068 & 0.0188 & 0.0019 & 0.0187 & 0.9556 & 0.0728\\
+rddCLQ & -0.1904 & 0.0307 & 0.0182 & 0.0247 & 0.8846 & 0.0922\\
+rddIW & -0.1925 & 0.0262 & 0.0162 & 0.0206 & 0.9240 & 0.0922\\
+rddAK & -0.1884 & 0.0310 & 0.0202 & 0.0236 & 0.9161 & 0.1028\\
+\addlinespace
+rddGAM & -0.2159 & 0.0164 & -0.0073 & 0.0147 & 0.9634 & 0.0682\\
+rddIKHonest & -0.2018 & 0.0173 & 0.0068 & 0.0159 & 1.0000 & 0.1477\\
+\bottomrule
+\end{tabular}
+\caption{Simulation Results for \textbf{JL-MATH} Generated Data} 
+\label{tab:jlmc} 
+\end{table} 
+
+\begin{table} [ht]
+\centering
+\begin{tabular}{lrrrrrr}
+\toprule
+  & est & rmse & bias & sd & covg & width\\
+\midrule
+rddIK & -0.0339 & 0.0109 & -0.0015 & 0.0108 & 0.9598 & 0.0454\\
+rddCLL & -0.0296 & 0.0149 & 0.0027 & 0.0147 & 0.9547 & 0.0573\\
+rddCLQ & -0.0259 & 0.0169 & 0.0064 & 0.0156 & 0.9631 & 0.0648\\
+rddIW & -0.0289 & 0.0140 & 0.0034 & 0.0136 & 0.9782 & 0.0630\\
+rddAK & -0.0260 & 0.0170 & 0.0064 & 0.0157 & 0.9740 & 0.0734\\
+\addlinespace
+rddGAM & -0.0407 & 0.0141 & -0.0084 & 0.0113 & 0.9623 & 0.0586\\
+rddIKHonest & -0.0339 & 0.0109 & -0.0015 & 0.0108 & 1.0000 & 0.2739\\
+\bottomrule
+\end{tabular}
+\caption{Simulation Results for \textbf{MATS-MATH} Generated Data} 
+\label{tab:matsmc} 
+\end{table} 
+
+\subsection{Discussion} 
+
+
+Both local linear regression and the two minimax linear estimators can be written as: 
+
+\[ \hat \tau = \sum \limits_{i=1}^n \hat \gamma_i Y_i \] 
+
+The IW estimator and the AK estimator select weights that minimize the worst-case RMSE over all possible smooth conditional mean functions in a restricted class. For the IW estimator, the conditional mean function has a bounded second derivative everywhere. For AK, the conditional mean function has a bounded second derivative at the cutoff. We see that these estimators have a much higher RMSE than the data-driven estimates. It is worth inspecting the weights of these estimators to explain why the optimal worst-case performance does not translate to better performance in practice. 
+
+In Figure \ref{fig:weights} we plot the weights of the IK estimator and the IW estimator for the LEE dataset. The IK estimator chooses a fairly wide bandwidth that leads to some bias but a lower standard deviation in simulations. In contrast, the IW wager, which must be robust to conditional mean functions that are very curved near the cutoff, selects weights that are much more narrow around the cutoff. This leads to a higher standard deviation in simulations, even for datasets like LEE where these estimators have very low bias. 
+
+\begin{figure}[ht] 
+\centering
+\includegraphics[width = 0.5\textwidth]{lee_weights.pdf} 
+\caption{Weights for each RDD estimator near the cutoff for LEE data} 
+\label{fig:weights} 
+\end{figure} 
+
 
 \section{Conclusion} 
 

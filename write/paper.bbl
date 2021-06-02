@@ -3,6 +3,29 @@
 \fi
 \begin{thebibliography}{xx}
 
+\harvarditem[Armstrong and Koles{\'a}r]{Armstrong and
+  Koles{\'a}r}{2018}{armstrong2018optimal}
+{\bf Armstrong, Timothy~B and Michal Koles{\'a}r}, ``Optimal inference in a
+  class of regression models,'' {\it Econometrica}, 2018, {\it 86} (2),
+  655--683.
+
+\harvarditem[Calonico et al.]{Calonico, Cattaneo and
+  Titiunik}{2014}{calonico2014robust}
+{\bf Calonico, Sebastian, Matias~D Cattaneo, and Rocio Titiunik}, ``Robust
+  nonparametric confidence intervals for regression-discontinuity designs,''
+  {\it Econometrica}, 2014, {\it 82} (6), 2295--2326.
+
+\harvarditem[Imbens and Kalyanaraman]{Imbens and
+  Kalyanaraman}{2012}{imbens2012optimal}
+{\bf Imbens, Guido and Karthik Kalyanaraman}, ``Optimal bandwidth choice for
+  the regression discontinuity estimator,'' {\it The Review of economic
+  studies}, 2012, {\it 79} (3), 933--959.
+
+\harvarditem[Imbens and Wager]{Imbens and Wager}{2019}{imbens2019optimized}
+{\bf \bysame{} and Stefan Wager}, ``Optimized regression discontinuity
+  designs,'' {\it Review of Economics and Statistics}, 2019, {\it 101} (2),
+  264--278.
+
 \harvarditem[Imbens and Lemieux]{Imbens and
   Lemieux}{2008}{imbens2008regression}
 {\bf Imbens, Guido~W and Thomas Lemieux}, ``Regression discontinuity designs: A
@@ -22,5 +45,9 @@
 \harvarditem[Matsudaira]{Matsudaira}{2008}{matsudaira2008mandatory}
 {\bf Matsudaira, Jordan~D}, ``Mandatory summer school and student
   achievement,'' {\it Journal of Econometrics}, 2008, {\it 142} (2), 829--850.
+
+\harvarditem[Wood]{Wood}{2017}{wood2017generalized}
+{\bf Wood, Simon~N}, {\it Generalized additive models: an introduction with R},
+  CRC press, 2017.
 
 \end{thebibliography}
