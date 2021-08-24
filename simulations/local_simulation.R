@@ -18,9 +18,9 @@ table_real_estimates <- function(estimators, data)  {
   print(kable(data.frame(estimates),"latex", row.names=T, digits=3, booktabs=T))
 }
 
-generate_tables <- function(real_path, gen_path, gt, n.sims=5, digits=NULL, small=NULL) {
+generate_tables <- function(real_path, gen_path, gt, n.sims=100, digits=NULL, small=NULL) {
   #estimators = c("rddIK", "rddLLRM", "rddLLRC", "rddIW", "rddAK", "rddQD")
-  estimators = c("rddIK", "rddIW", "rddGAM")
+  estimators = c("rddIK", "rddGAM")
   if(!is.null(real_path)) {
     data <- read.csv(real_path)
     n1= nrow(data[data$x>0,])
@@ -64,7 +64,7 @@ generate_tables <- function(real_path, gen_path, gt, n.sims=5, digits=NULL, smal
 
 #generate_tables(NULL,"data/generated/mc_smooth.feather")
 #generate_tables(NULL,"data/generated/mc_curved.feather")
-generate_tables("data/cleaned/lee.csv", "data/generated/lee_generated.feather", 0.07335597)
+generate_tables("data/cleaned/lee.csv", "data/generated/lee_generated.feather", 0.08543315529823303)
 generate_tables("data/cleaned/m_math.csv", "data/generated/m_math_generated.feather", digits=0)
 generate_tables("data/cleaned/jl_math.csv","data/generated/jl_math_generated.feather", digits=2) 
  

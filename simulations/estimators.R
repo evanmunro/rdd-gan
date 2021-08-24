@@ -1,6 +1,6 @@
 
-library(JuliaCall)
-julia_eval("include(\"simulations/ikhonest.jl\")")
+#library(JuliaCall)
+#julia_eval("include(\"simulations/ikhonest.jl\")")
 
 #julia_eval("include(\"../BayesRDD/src/code/estimators/bayesrdd.jl\")")
 #julia_eval("include(\"../BayesRDD/src/code/estimators/gpsimple.jl\")")
@@ -90,13 +90,22 @@ rddCLL <- function(Y, X, c=0) {
   return(list(ate=ate, se=se, ci.lower=ci.lower, ci.upper=ci.upper, bw=model$bws['h','left']))
 }
 
-#re seems to work best
+
+#sp of 30 beats IK for lee data 
 gamfit <- function(y, x, xpred) {
   #model <- gam(y ~ s(x, k=30, bs="re"), data = data.frame(y=y, x=x), method="ML")
-  weights = (max(abs(x)) - abs(x))/max(abs(x))^2
+  #weights = (max(abs(x)) - abs(x))/max(abs(x))^2
+  #sp = 0.005473115
+  model <- gam(y ~ s(x, k=30, bs="ts", sp = 30), data = data.frame(y=y, x=x), method="REML")
+  print(model$sp)
+  #model <- gam(y ~ s(x, k=30, bs="ts"), data = data.frame(y=y, x=x),weights=weights, select=TRUE, method="P-REML")
+  #print(gam.check(model))
+  return(predict(model, newdata=data.frame(x=xpred), se.fit=TRUE))
+}
 
-  #model <- gam(y ~ s(x,k=20, bs="ts"), data = data.frame(y=y, x=x),weights=weights, method="REML")
-  model <- gam(y ~ s(x, k=30, bs="ts"), data = data.frame(y=y, x=x),weights=weights, select=TRUE, method="P-REML")
+scamfit <- function(y, x, xpred) {
+  model <- scam::scam(y ~ s(x, bs="mpi"),  data = data.frame(y=y, x=x))
+  #model <- gam(y ~ s(x, k=30, bs="ts"),)
   #print(gam.check(model))
   return(predict(model, newdata=data.frame(x=xpred), se.fit=TRUE))
 }
@@ -164,6 +173,16 @@ rddPoly <- function(Y, X, c=0) {
   mu1 = polyfit(Y[X>0], X[X>0], c(0))
   mu0 = polyfit(Y[X<0], X[X<0], c(0))
   return(list(ate=mu1-mu0, se=0, ci.lower = 0, ci.upper = 0, bw =0 ))
+}
+
+rddSCAM <- function(Y, X, c=0) {
+  #Y = Y[abs(X) < median(abs(X))]
+  #X = X[abs(X) < median(abs(X))]
+  mu1 = scamfit(Y[X>0], X[X>0], c(0))
+  mu0 = scamfit(Y[X<0], X[X<0], c(0))
+  se = sqrt(mu1$se.fit^2 + mu0$se.fit^2)
+  tau = mu1$fit - mu0$fit
+  return(list(ate=tau, se=se, ci.lower = tau-se*1.96, ci.upper = tau+se*1.96, bw =0 ))
 }
 
 rddGAM <- function(Y, X, c=0) {

@@ -29,3 +29,23 @@ math.data <- data.frame(y=raw.data$rmath1,z1=raw.data$mtge0-2.8,z2 = raw.data$rd
 math.data$x <- pmin(math.data$z1,math.data$z2)
 math.data$w <- math.data$x<0
 write.csv(math.data,file="~/Documents/Github/rdd-gan/data/cleaned/jl_math.csv",row.names=F)
+
+
+#Meyersson (2014) data on Turkey elections
+#x is min -100, max 100 , y is [0, 100]
+data <- read.csv("data/meyersson_raw.csv") 
+data <- data.frame(y = data$Y, x= data$X)
+write.csv(data, "data/cleaned/meyersson.csv")
+#Senate Incumbency data on US elections
+#x is min -100, max 100 , y is [0, 100]
+data <- read.csv("data/senate_raw.csv")
+data <- data.frame(y = data$demvoteshfor2, x= data$demmv)
+data <- data[!is.na(data$y), ]
+write.csv(data, "data/cleaned/senate.csv")
+#Incumbency curse on Brazil electoins
+#x is min -100, max 100 , y is [-100, 100]
+data <- read.csv("data/brazil_raw.csv")
+data <- data.frame(y = data$mv_incpartyfor1, x= data$mv_incparty)
+data <- data[!is.na(data$y), ]
+data <- data[!is.na(data$x), ]
+write.csv(data, "data/cleaned/brazil.csv")

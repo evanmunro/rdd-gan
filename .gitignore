@@ -15,4 +15,4 @@ tables/*
 *.out
 *.log 
 *.gz 
-
+generation/*

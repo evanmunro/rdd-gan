@@ -44,7 +44,7 @@ class GanRDD(object):
         df_fake = self.generate_data(sample_size = self.data.shape[0])
         scatterplot = dict(x= ["x"],
                      y= ["y"],
-                     samples = 5000, smooth = 0)
+                     samples = 1000, smooth = 0)
         histogram = dict(variables=['x','y','x','y'],
                        nrow=2, ncol=2)
         wgan.compare_dfs(self.data, df_fake, figsize=5, histogram=histogram, scatterplot=scatterplot,
@@ -75,8 +75,8 @@ class GanWrapper(object):
         self.context = context_scaled
 
         self.specs = wgan.Specifications(self.dwrapper,
-        #batch 256
-                                       batch_size=2048,
+        #batch was 2048
+                                       batch_size=256,
                                        critic_steps=25,
                                        optimizer=torch.optim.Adam,
                                        generator_optimizer=wgan.OAdam,
