@@ -4,7 +4,7 @@ import pandas as pd
 def run_training_loop(dname, xbound, ybound):
     data = pd.read_csv("data/cleaned/"+dname+".csv")
     print(dname)
-    ganModel = GanRDD("dname", data, xbound = xbound, ybound = ybound, epochs=2000)
+    ganModel = GanRDD(dname, data, xbound = xbound, ybound = ybound, epochs=2000)
     #leeGAN.load()
     ganModel.train()
     ganModel.save_models()
