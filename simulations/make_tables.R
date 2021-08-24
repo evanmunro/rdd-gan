@@ -40,7 +40,9 @@ make_tables <- function(name, gt) {
     sink()
 }
 
-
+make_tables("meyersson", 3.809218406677246)
+make_tables("senate", 7.691082000732422)
+make_tables("brazil", )
 make_tables("lee", 0.08543315529823303)
 make_tables("jl_math", -0.208665132522583)
 make_tables("mats_math", -0.03234344720840454)
