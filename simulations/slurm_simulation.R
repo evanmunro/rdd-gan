@@ -3,7 +3,7 @@ library(arrow)
 args = commandArgs(TRUE)
 name = args[1]
 fraction = 1
-runs = 1200
+runs = 12
 
 submit_slurm <- function(name, chunkpath, runpath) {
 

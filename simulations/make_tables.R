@@ -3,7 +3,7 @@ library(arrow)
 
 make_tables <- function(name, gt) {
     print(name)
-    estimators = c("rddIK", "rddCLL", "rddCLQ", "rddIW", "rddAK",  "rddGAM")
+    estimators = c("LLinearIK", "LLinearCatt", "LQuadCatt", "MinMaxIW", "MinMaxAK", "MinMaxIW20", "MinMaxAK20", "MinMaxMON")
     outpath  = paste0("output/", name, "/")
     tablepath = paste0("tables/", name, "_sims", ".txt")
 
@@ -32,6 +32,8 @@ make_tables <- function(name, gt) {
                         return(c(est, rmse, bias, sd, covg, width))
                     }))
     colnames(results) <- c("est", "rmse", "bias", "sd", "covg", "width")
+    results$rmsep <- results$rmse/min(results$rmse)
+    results <- results[, c("est", "rmsep", "rmse", "bias", "sd", "covg", "width")]
     result.ltx <- kable(results, "latex", digits=4, booktabs=T)
     print(result.ltx)
 
@@ -40,9 +42,9 @@ make_tables <- function(name, gt) {
     sink()
 }
 
+make_tables("lee", 0.08543315529823303)
+make_tables("jl_math", -0.208665132522583)
+make_tables("mats_math", -0.03234344720840454)
 make_tables("meyersson", 3.809218406677246)
 make_tables("senate", 7.691082000732422)
 make_tables("brazil", -4.142387390136719)
-#make_tables("lee", 0.08543315529823303)
-#make_tables("jl_math", -0.208665132522583)
-#make_tables("mats_math", -0.03234344720840454)
