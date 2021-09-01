@@ -3,7 +3,11 @@ library(arrow)
 
 make_tables <- function(name, gt) {
     print(name)
-    estimators = c("LLinearIK", "LLinearCatt", "LQuadCatt", "MinMaxIW", "MinMaxAK", "MinMaxIW20", "MinMaxAK20", "MinMaxMON")
+    if (name %in% c("jl_math", "mats_math")) {
+        estimators = c("LLinearIK", "LLinearCatt", "LQuadCatt", "MinMaxIW", "MinMaxAK", "MinMaxIW20", "MinMaxAK20", "MinMaxMON")
+    } else{
+        estimators = c("LLinearIK", "DiscreteIK", "LLinearCatt", "LQuadCatt", "MinMaxIW", "MinMaxAK", "MinMaxIW20", "MinMaxAK20", "MinMaxMON")
+    }
     outpath  = paste0("output/", name, "/")
     tablepath = paste0("tables/", name, "_sims", ".txt")
 
