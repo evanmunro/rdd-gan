@@ -18,7 +18,7 @@ second_deriv_bound <- function(Y, X) {
 }
 
 discreteBWSelect <- function(Y, X) {
-  hchoice = sort(unique(abs(data$x)))[1:25]
+  hchoice = sort(unique(abs(X)))[1:25]
   amse = rep(0, length(hchoice))
   rd <- rddtools::rdd_data(x=X, y=Y, cutpoint=0)
   amse <- sapply(hchoice, function(h) rddtools::ik_amse(rd, kernel="Triangular", bw=h) )
