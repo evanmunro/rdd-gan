@@ -17,13 +17,31 @@ second_deriv_bound <- function(Y, X) {
   return(M)
 }
 
+discreteBWSelect <- function(Y, X) {
+  hchoice = sort(unique(abs(data$x)))[1:25]
+  amse = rep(0, length(hchoice))
+  rd <- rddtools::rdd_data(x=X, y=Y, cutpoint=0)
+  amse <- sapply(hchoice, function(h) rddtools::ik_amse(rd, kernel="Triangular", bw=h) )
+  hstar = hchoice[which.min(amse)]
+  return(hstar)
+}
+
+DiscreteIK <- function(Y, X, c=0) {
+  bw <- discreteBWSelect(Y, X)
+  model <- rdd::RDestimate(y~x, data.frame(y=Y, x=X), cutpoint=c, bw=c(bw, bw))
+  ate <- as.numeric(model$est[1])
+  se <- model$se[1]
+  ci <- model$ci[1,]
+  return(list(ate=ate, se=se, ci.lower=ci[1], ci.upper=ci[2], bw=model$bw[1]))
+}
+
 LLinearIK <- function(Y, X, c=0) {
   #Y = Y[abs(X) < median(abs(X))]
   #X = X[abs(X) < median(abs(X))]
   rd <- rddtools::rdd_data(x=X, y=Y, cutpoint=0)
-  bw <- rddtools::rdd_bw_ik(rd)
+  bw <- rddtools::rdd_bw_ik(rd, kernel="Triangular")
   #print(bw)
-  model <- rdd::RDestimate(y~x, data.frame(y=Y, x=X), cutpoint=c, bw=bw)
+  model <- rdd::RDestimate(y~x, data.frame(y=Y, x=X), cutpoint=c, bw=c(bw, bw))
   ate <- as.numeric(model$est[1])
   se <- model$se[1]
   ci <- model$ci[1,]
