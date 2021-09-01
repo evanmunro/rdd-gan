@@ -32,6 +32,7 @@ make_tables <- function(name, gt) {
                         return(c(est, rmse, bias, sd, covg, width))
                     }))
     colnames(results) <- c("est", "rmse", "bias", "sd", "covg", "width")
+    results <- data.frame(results)
     results$rmsep <- results$rmse/min(results$rmse)
     results <- results[, c("est", "rmsep", "rmse", "bias", "sd", "covg", "width")]
     result.ltx <- kable(results, "latex", digits=4, booktabs=T)
