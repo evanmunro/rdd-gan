@@ -16,4 +16,5 @@ def run_training_loop(dname, xbound, ybound):
 
 #run_training_loop("meyersson", [-100, 100], [0, 100])
 #run_training_loop("senate", [-100, 100], [0, 100])
-run_training_loop("brazil", [-100, 100], [-100, 100])
+#run_training_loop("brazil", [-100, 100], [-100, 100])
+run_training_loop("curved", [-1, 1], [-1000, 1000])

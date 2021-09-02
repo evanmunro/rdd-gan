@@ -47,6 +47,8 @@ make_tables <- function(name, gt) {
     sink()
 }
 
+make_tables("curved", 1.02711510658264)
+make_tables("mc_curved", 0.5)
 make_tables("lee", 0.08543315529823303)
 make_tables("jl_math", -0.208665132522583)
 make_tables("mats_math", -0.03234344720840454)

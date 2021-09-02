@@ -6,6 +6,5 @@
 #SBATCH --mem=16G
 
 module load R/4.0.2
-Rscript simulations/slurm_simulation.R meyersson
-Rscript simulations/slurm_simulation.R senate
-Rscript simulations/slurm_simulation.R brazil
+Rscript simulations/slurm_simulation.R mc_curved
+Rscript simulations/slurm_simulation.R curved
