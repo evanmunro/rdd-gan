@@ -1,3 +1,5 @@
+library(JuliaCall)
+julia_command('include("../MinMaxRDD/adaptiveminmax.jl")')
 
 calc_max_d1 <- function(Y, X) {
   df  = data.frame(y=Y, x=X)
@@ -26,6 +28,18 @@ discreteBWSelect <- function(Y, X) {
   return(hstar)
 }
 
+MinMaxAdapt <- function(Y, X, c=0) {
+  julia_assign("y", Y)
+  julia_assign("x", X)
+  julia_command("using Revise")
+  julia_command("result = adaptrdd(x, y)")
+  ate = julia_eval("result.τ")
+  se = julia_eval("result.σ")
+  ci.lower = julia_eval("result.ci[1]")
+  ci.upper = julia_eval("result.ci[2]")
+  bw = 0 
+  return(list(ate=ate, se=se, ci.lower = ci.lower, ci.upper = ci.upper, bw= bw))
+}
 DiscreteIK <- function(Y, X, c=0) {
   bw <- discreteBWSelect(Y, X)
   model <- rdd::RDestimate(y~x, data.frame(y=Y, x=X), cutpoint=c, bw=c(bw, bw))
@@ -130,9 +144,11 @@ estimate_sample <- function(estimators, dfa, dfb, na, nb, gt) {
   dfa <- dfa[sample(1:nrow(dfa), na), ]
   dfb <- dfb[sample(1:nrow(dfb), nb), ]
   df <- data.frame(rbind(dfa, dfb))
-  rd <- rddtools::rdd_data(x=df$x, y=df$y, cutpoint=0)
-  bw <- rddtools::rdd_bw_ik(rd)
-  M <- select_M(dfa, dfb, bw)
+  #sub <- abs(df$x) <0.25
+ # df <- df[sub, ]
+  #rd <- rddtools::rdd_data(x=df$x, y=df$y, cutpoint=0)
+  #bw <- rddtools::rdd_bw_ik(rd)
+  M <- second_deriv_bound(df$y, df$x)
   estimates <- sapply(estimators, FUN = function(x) return(run_estimate(x, df, M)))
   return(estimates)
 }

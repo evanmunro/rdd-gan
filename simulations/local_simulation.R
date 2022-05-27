@@ -20,7 +20,7 @@ table_real_estimates <- function(estimators, data)  {
 
 generate_tables <- function(real_path, gen_path, gt, n.sims=100, digits=NULL, small=NULL) {
   #estimators = c("rddIK", "rddLLRM", "rddLLRC", "rddIW", "rddAK", "rddQD")
-  estimators = c("rddIK", "rddGAM")
+  estimators = c("LLinearIK", "MinMaxIW", "MinMaxAK", "MinMaxAdapt")
   if(!is.null(real_path)) {
     data <- read.csv(real_path)
     n1= nrow(data[data$x>0,])
@@ -46,7 +46,8 @@ generate_tables <- function(real_path, gen_path, gt, n.sims=100, digits=NULL, sm
   #gen <- read_feather("data/generated/lee_generated.feather")
   gen <- arrow::read_feather("data/generated/lee_generated.feather")
   print(head(gen))
-  #gt = rddIK(gen$y,gen$x)$ate
+ # print(head(gen))
+ # gt = LLinearIK(gen$y,gen$x)$ate
   #gt = 0.5
   print("Ground Truth")
   print(gt)
